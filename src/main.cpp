@@ -2,6 +2,8 @@
 #include <GL/glu.h>
 #include <GL/glut.h>
 #include <iostream>
+#include "mainCube.hpp"
+#include "shapes.hpp"
 
 int window_w, window_h; // Pri promeni pamti se širina i visina prozora
 int mouse_x = 0, mouse_y = 0; // Pri promeni pamti se pozicija miša
@@ -68,11 +70,14 @@ void on_display()
     glMultMatrixf(rotation_matrix);
 
     /* Iscrtava se osnovna kocka */
-    glColor3f(0.5, 0.5, 0.5);
-    glPushMatrix();
-        glRotatef(30, 0, 1, 0);
-        glutWireCube(2);
-    glPopMatrix();
+    MainCube m;
+    m.draw();
+
+    /* Ponovo se podesava pogled i matrica postavlja na jediničnu da se ne bi objekti rotirali sa kockom zajedno */
+    glLoadIdentity();
+    gluLookAt(0, 3, 6, 0, 0, 0, 0, 1, 0);
+
+    /* TODO: dodati objekte*/
 
     glutSwapBuffers();
 }
