@@ -24,7 +24,7 @@ int main(int argc, char **argv)
     glutInitWindowSize(800, 600);
     glutInitWindowPosition(0, 100);
     glutCreateWindow("Shapes and colors");
-//    glutFullScreen();
+    glutFullScreen();
 
     initialize();
 
@@ -74,7 +74,7 @@ void on_display()
     /* Podešava se tačka pogleda */
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    gluLookAt(0, 3, 6, 0, 0, 0, 0, 1, 0);
+    gluLookAt(0, 3, 7, 0, 0, 0, 0, 1, 0);
 
     /* Primenjuje se matrica rotacije tako što se množi sa matricom za pogled i transformaciju */
     glMultMatrixf(rotation_matrix);
@@ -82,10 +82,6 @@ void on_display()
     /* Iscrtava se osnovna kocka */
     MainCube m;
     m.draw();
-
-    /* Ponovo se podesava pogled i matrica postavlja na jediničnu da se ne bi objekti rotirali sa kockom zajedno */
-    //glLoadIdentity();
-    //gluLookAt(0, 3, 6, 0, 0, 0, 0, 1, 0);
 
     /* TODO: dodati objekte*/
 
