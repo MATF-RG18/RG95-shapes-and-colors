@@ -7,7 +7,7 @@
 
 class MainCube {
 public:
-    MainCube(float size = 2)
+    MainCube(float size = 3)
     : _size(size)
     {}
 

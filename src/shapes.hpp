@@ -56,7 +56,15 @@ private:
 };
 
 class Cylinder : public Shape {
+public:
+    Cylinder(float color_r, float color_g, float color_b, float center_x, float center_y, float center_z, float height, float base)
+    : Shape(color_r, color_g, color_b, center_x, center_y, center_z), _height(height), _base(base)
+    {}
 
+    void draw() const;
+private:
+    float _height;
+    float _base;
 };
 
 class Star : public Shape {

@@ -21,9 +21,10 @@ int main(int argc, char **argv)
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
 
-    glutInitWindowSize(500, 500);
-    glutInitWindowPosition(100, 100);
+    glutInitWindowSize(800, 600);
+    glutInitWindowPosition(0, 100);
     glutCreateWindow("Shapes and colors");
+//    glutFullScreen();
 
     initialize();
 
@@ -41,7 +42,10 @@ int main(int argc, char **argv)
 void initialize()
 {
     glClearColor(0, 0, 0, 0);
+
+    /* Omogućava se provera dubine i normalizacija vektora normale */
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_NORMALIZE);
 
     /* Vrsi se inicijalizacija matrice rotacije na jedinicnu matricu */
     glMatrixMode(GL_MODELVIEW);
@@ -54,6 +58,12 @@ void on_keyboard(unsigned char key, int x, int y)
     switch (key) {
         case 27: /* U slučaju da korisnik pritisne esc program se zaustavlja */
             exit(0);
+        case 'R':
+        case 'r': glMatrixMode(GL_MODELVIEW);
+                  glLoadIdentity();
+                  glGetFloatv(GL_MODELVIEW_MATRIX, rotation_matrix);
+                  glutPostRedisplay();
+                  break;
     }
 }
 
@@ -74,8 +84,8 @@ void on_display()
     m.draw();
 
     /* Ponovo se podesava pogled i matrica postavlja na jediničnu da se ne bi objekti rotirali sa kockom zajedno */
-    glLoadIdentity();
-    gluLookAt(0, 3, 6, 0, 0, 0, 0, 1, 0);
+    //glLoadIdentity();
+    //gluLookAt(0, 3, 6, 0, 0, 0, 0, 1, 0);
 
     /* TODO: dodati objekte*/
 
