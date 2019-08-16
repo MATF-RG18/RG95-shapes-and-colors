@@ -1,233 +1,239 @@
 #include "shapes.hpp"
 #include "mainCube.hpp"
 #include <cmath>
-#include <GL/glut.h>
-#include <GL/glu.h>
-#include <GL/glut.h>
 
-void Sphere::draw() const
+unsigned int Shape::id = 0;
+
+void Sphere::draw()
 {
-    glColor3f(_color_r, _color_g, _color_b);
+    glColor3f(_c.color_r, _c.color_g, _c.color_b);
 
     glPushMatrix();
-        glTranslatef(_center_x, _center_y, _center_z);
+        glTranslatef(_xyz.center_x, _xyz.center_y, _xyz.center_z);
         glutSolidSphere(_size, 30, 30);
+        glGetFloatv(GL_MODELVIEW_MATRIX, _system); // Pamti se sistem objekta
     glPopMatrix();
 }
 
-void Cube::draw() const
+void Cube::draw()
 {
-    glColor3f(_color_r, _color_g, _color_b);
+    glColor3f(_c.color_r, _c.color_g, _c.color_b);
 
     glPushMatrix();
-        glTranslatef(_center_x, _center_y, _center_z);
+        glTranslatef(_xyz.center_x, _xyz.center_y, _xyz.center_z);
         glutSolidCube(_size);
+        glGetFloatv(GL_MODELVIEW_MATRIX, _system);
     glPopMatrix();
 }
 
-void TriangularPrism::draw() const
+void TriangularPrism::draw()
 {
-    glColor3f(_color_r, _color_g, _color_b);
+    glColor3f(_c.color_r, _c.color_g, _c.color_b);
 
     glPushMatrix();
-        glTranslatef(_center_x, _center_y, _center_z);
-        draw_prism(_size);
+        glTranslatef(_xyz.center_x, _xyz.center_y, _xyz.center_z);
+        draw_prism(_size, _height);
+        glGetFloatv(GL_MODELVIEW_MATRIX, _system);
     glPopMatrix();
 }
 
-void Cylinder::draw() const
+void Cylinder::draw()
 {
-    glColor3f(_color_r, _color_g, _color_b);
+    glColor3f(_c.color_r, _c.color_g, _c.color_b);
 
     glPushMatrix();
-        glTranslatef(_center_x, _center_y, _center_z);
+        glTranslatef(_xyz.center_x, _xyz.center_y, _xyz.center_z);
         draw_cylinder(_height, _size, false);
+        glGetFloatv(GL_MODELVIEW_MATRIX, _system);
     glPopMatrix();
 }
 
 /* Zvezda se crta iz 12 trostranih prizmi, sa leva na desno po redovima */
-void Star::draw() const
+void Star::draw()
 {
-    glColor3f(_color_r, _color_g, _color_b);
+    glColor3f(_c.color_r, _c.color_g, _c.color_b);
 
     glPushMatrix();
-        glTranslatef(_center_x, _center_y, _center_z);
+        glTranslatef(_xyz.center_x, _xyz.center_y, _xyz.center_z);
 
         glPushMatrix();
             glTranslatef(0, 0, -_size*sqrt(3)/4*3);
             glRotatef(-90, 1, 0, 0);
-            draw_prism(_size);
+            draw_prism(_size, _size);
         glPopMatrix();
 
         glPushMatrix();
             glTranslatef(-_size, 0, -_size*sqrt(3)/4);
             glRotatef(90, 1, 0, 0);
-            draw_prism(_size);
+            draw_prism(_size, _size);
         glPopMatrix();
 
         glPushMatrix();
             glTranslatef(-_size/2, 0, -_size*sqrt(3)/4);
             glRotatef(-90, 1, 0, 0);
-            draw_prism(_size);
+            draw_prism(_size, _size);
         glPopMatrix();
 
         glPushMatrix();
             glTranslatef(0, 0, -_size*sqrt(3)/4);
             glRotatef(90, 1, 0, 0);
-            draw_prism(_size);
+            draw_prism(_size, _size);
         glPopMatrix();
 
         glPushMatrix();
             glTranslatef(_size/2, 0, -_size*sqrt(3)/4);
             glRotatef(-90, 1, 0, 0);
-            draw_prism(_size);
+            draw_prism(_size, _size);
         glPopMatrix();
 
         glPushMatrix();
             glTranslatef(_size, 0, -_size*sqrt(3)/4);
             glRotatef(90, 1, 0, 0);
-            draw_prism(_size);
+            draw_prism(_size, _size);
         glPopMatrix();
 
         glPushMatrix();
             glTranslatef(-_size, 0, _size*sqrt(3)/4);
             glRotatef(-90, 1, 0, 0);
-            draw_prism(_size);
+            draw_prism(_size, _size);
         glPopMatrix();
 
         glPushMatrix();
             glTranslatef(-_size/2, 0, _size*sqrt(3)/4);
             glRotatef(90, 1, 0, 0);
-            draw_prism(_size);
+            draw_prism(_size, _size);
         glPopMatrix();
 
         glPushMatrix();
             glTranslatef(0, 0, _size*sqrt(3)/4);
             glRotatef(-90, 1, 0, 0);
-            draw_prism(_size);
+            draw_prism(_size, _size);
         glPopMatrix();
 
         glPushMatrix();
             glTranslatef(_size/2, 0, _size*sqrt(3)/4);
             glRotatef(90, 1, 0, 0);
-            draw_prism(_size);
+            draw_prism(_size, _size);
         glPopMatrix();
 
         glPushMatrix();
             glTranslatef(_size, 0, _size*sqrt(3)/4);
             glRotatef(-90, 1, 0, 0);
-            draw_prism(_size);
+            draw_prism(_size, _size);
         glPopMatrix();
 
         glPushMatrix();
             glTranslatef(0, 0, _size*sqrt(3)/4*3);
             glRotatef(90, 1, 0, 0);
-            draw_prism(_size);
+            draw_prism(_size, _size);
         glPopMatrix();
 
+        glGetFloatv(GL_MODELVIEW_MATRIX, _system);
     glPopMatrix();
 }
 
 /* Srce se crta iz tri dela, trostrane prizme i dva poluvaljka */
-void Heart::draw() const
+void Heart::draw()
 {
-    glColor3f(_color_r, _color_g, _color_b);
+    glColor3f(_c.color_r, _c.color_g, _c.color_b);
 
     glPushMatrix();
-        glTranslatef(_center_x, _center_y, _center_z);
+        glTranslatef(_xyz.center_x, _xyz.center_y, _xyz.center_z);
 
         glPushMatrix();
             glRotatef(90, 1, 0, 0);
-            draw_prism(_size);
+            draw_prism(_size, _height);
         glPopMatrix();
 
         glPushMatrix();
             glTranslatef(_size/4, 0, -_size*sqrt(3)/4);
             glRotatef(180, 0, 1, 0);
-            draw_cylinder(_size, _size/4, true);
+            draw_cylinder(_height, _size/4, true);
         glPopMatrix();
 
         glPushMatrix();
             glTranslatef(-_size/4, 0, -_size*sqrt(3)/4);
             glRotatef(180, 0, 1, 0);
-            draw_cylinder(_size, _size/4, true);
+            draw_cylinder(_height, _size/4, true);
         glPopMatrix();
 
+        glGetFloatv(GL_MODELVIEW_MATRIX, _system);
     glPopMatrix();
 }
 
-/* Cvet se crta iz nekoliko delova, 5 valjaka koji predtavljaju latice i dva kruga koji predstavljaju sredinu cveta */
-void Flower::draw() const
+/* Cvet se crta iz 6 valjaka koji predtavljaju latice */
+void Flower::draw()
 {
-    glColor3f(_color_r, _color_g, _color_b);
+    glColor3f(_c.color_r, _c.color_g, _c.color_b);
 
     glPushMatrix();
-        glTranslatef(_center_x, _center_y, _center_z);
+        glTranslatef(_xyz.center_x, _xyz.center_y, _xyz.center_z);
 
+        // Iscrtava se centralni valjak
         glPushMatrix();
-            glTranslatef(0, 0, -_size*7/6);
-            draw_cylinder(_size, _size, false);
+            draw_cylinder(_size-0.1, _size*4/3, false);
         glPopMatrix();
 
         glPushMatrix();
-            glTranslatef(_size*7/6, 0, 0);
+            glTranslatef(_size*4/3, 0, _size);
             draw_cylinder(_size-0.1, _size, false);
         glPopMatrix();
 
         glPushMatrix();
-            glTranslatef(-_size*7/6, 0, 0);
+            glTranslatef(_size*4/3, 0, -_size);
             draw_cylinder(_size-0.1, _size, false);
         glPopMatrix();
 
         glPushMatrix();
-            glTranslatef(-_size/2, 0, _size);
+            glTranslatef(0, 0, _size*4/3);
             draw_cylinder(_size-0.1, _size, false);
         glPopMatrix();
 
-        glPushMatrix();
-            glTranslatef(_size/2, 0, _size);
-            draw_cylinder(_size-0.1, _size, false);
-        glPopMatrix();
+        //TODO: Popraviti cvet
+//
+//        glPushMatrix();
+//            glTranslatef(_size/2, 0, _size);
+//            draw_cylinder(_size-0.1, _size, false);
+//        glPopMatrix();
 
-        glColor3f(1, 1, 0);
-        draw_base(_size+0.01, _size*2/3, false);
+        glGetFloatv(GL_MODELVIEW_MATRIX, _system);
     glPopMatrix();
 }
 
 /* Trostrana prizma crta se od dva trougla medjusobno spojenih pravougaonicima */
-void draw_prism(float size)
+void draw_prism(float size, float height)
 {
     glBegin(GL_TRIANGLES);
-        glVertex3f(-size/2, -size*sqrt(3)/4, size/2);
-        glVertex3f(size/2, -size*sqrt(3)/4, size/2);
-        glVertex3f(0, size*sqrt(3)/4, size/2);
+        glVertex3f(-size/2, -size*sqrt(3)/4, height/2);
+        glVertex3f(size/2, -size*sqrt(3)/4, height/2);
+        glVertex3f(0, size*sqrt(3)/4, height/2);
     glEnd();
 
     glBegin(GL_QUADS);
-        glVertex3f(size/2, -size*sqrt(3)/4, -size/2);
-        glVertex3f(0, size*sqrt(3)/4, -size/2);
-        glVertex3f(0, size*sqrt(3)/4, size/2);
-        glVertex3f(size/2, -size*sqrt(3)/4, size/2);
+        glVertex3f(size/2, -size*sqrt(3)/4, -height/2);
+        glVertex3f(0, size*sqrt(3)/4, -height/2);
+        glVertex3f(0, size*sqrt(3)/4, height/2);
+        glVertex3f(size/2, -size*sqrt(3)/4, height/2);
     glEnd();
 
     glBegin(GL_QUADS);
-        glVertex3f(0, size*sqrt(3)/4, -size/2);
-        glVertex3f(-size/2, -size*sqrt(3)/4, -size/2);
-        glVertex3f(-size/2, -size*sqrt(3)/4, size/2);
-        glVertex3f(0, size*sqrt(3)/4, size/2);
+        glVertex3f(0, size*sqrt(3)/4, -height/2);
+        glVertex3f(-size/2, -size*sqrt(3)/4, -height/2);
+        glVertex3f(-size/2, -size*sqrt(3)/4, height/2);
+        glVertex3f(0, size*sqrt(3)/4, height/2);
     glEnd();
 
     glBegin(GL_QUADS);
-        glVertex3f(-size/2, -size*sqrt(3)/4, -size/2);
-        glVertex3f(size/2, -size*sqrt(3)/4, -size/2);
-        glVertex3f(size/2, -size*sqrt(3)/4, size/2);
-        glVertex3f(-size/2, -size*sqrt(3)/4, size/2);
+        glVertex3f(-size/2, -size*sqrt(3)/4, -height/2);
+        glVertex3f(size/2, -size*sqrt(3)/4, -height/2);
+        glVertex3f(size/2, -size*sqrt(3)/4, height/2);
+        glVertex3f(-size/2, -size*sqrt(3)/4, height/2);
     glEnd();
 
     glBegin(GL_TRIANGLES);
-        glVertex3f(-size/2, -size*sqrt(3)/4, -size/2);
-        glVertex3f(size/2, -size*sqrt(3)/4, -size/2);
-        glVertex3f(0, size*sqrt(3)/4, -size/2);
+        glVertex3f(-size/2, -size*sqrt(3)/4, -height/2);
+        glVertex3f(size/2, -size*sqrt(3)/4, -height/2);
+        glVertex3f(0, size*sqrt(3)/4, -height/2);
     glEnd();
 }
 
@@ -258,14 +264,6 @@ void draw_cylinder(float height, float base, bool half)
         glEnd();
     }
 
-    draw_base(height, base, half);
-}
-
-/* Iscrtavaju se baze cilindra */
-void draw_base(float height, float base, bool half)
-{
-    double i,j;
-
     for(i = -height/2; i <= height/2; i += height)
     {
         glBegin(GL_TRIANGLE_FAN);
@@ -283,3 +281,25 @@ void draw_base(float height, float base, bool half)
         glEnd();
     }
 }
+
+bool operator==(const Color& left, const Color& right)
+{
+    float d1 = std::fabs(left.color_r - right.color_r);
+    float d2 = std::fabs(left.color_g - right.color_g);
+    float d3 = std::fabs(left.color_b - right.color_b);
+    float eps = 0.01;
+
+    return d1 <= eps && d2 <= eps && d3 <= eps;
+}
+
+bool operator<(const Color& left, const Color& right)
+{
+    if (left.color_r == right.color_r && left.color_g == right.color_g) {
+        return left.color_b < right.color_b;
+    } else if (left.color_r == right.color_r) {
+        return left.color_g < right.color_g;
+    } else {
+        return left.color_r < right.color_r;
+    }
+}
+
