@@ -18,7 +18,6 @@ public:
     {}
 
     void draw() const;
-    float getSize() const;
 private:
     float _size;
 };

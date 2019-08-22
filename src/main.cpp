@@ -7,8 +7,10 @@
 #include "mainCube.hpp"
 #include "shapes.hpp"
 #include "firstScene.hpp"
+#include "texture.hpp"
 
 #define TIMER_ID 0
+#define FILENAME0 "images/tekstura_kutije.bmp"
 
 int window_w, window_h; // Pri promeni pamti se širina i visina prozora
 int mouse_x = 0, mouse_y = 0; // Pri promeni pamti se pozicija miša
@@ -20,6 +22,7 @@ extern std::map<Color, int> object_colors; // Mapira se boja u indeks u nizu obj
 extern std::map<Color, int> object_colors_on_cube; // Mapira se boja u indeks u nizu objekata za objekte na glavnoj kocki. Koristi se za selekciju.
 int selected_object = -1; // Indeks objekta koji je selektovan
 bool waiting_for_another_click = false; // Koristi se za registrovanje dvoklika
+GLuint names[2]; // Identifikatori tekstura
 
 void on_display();
 void initialize();
@@ -38,7 +41,7 @@ int main(int argc, char **argv) {
     glutInitWindowSize(800, 600);
     glutInitWindowPosition(0, 100);
     glutCreateWindow("Shapes and colors");
-    glutFullScreen();
+//    glutFullScreen();
 
     initialize();
 
@@ -65,12 +68,40 @@ void initialize() {
     glLoadIdentity();
     glGetFloatv(GL_MODELVIEW_MATRIX, rotation_matrix);
 
-    get_coordinates(); // Koordinate na kocki
+    Texture image; // Objekat koji predstavlja teksturu učitanu iz fajla
+
+    /* Uključuju se teksture */
+    glEnable(GL_TEXTURE_2D);
+
+    glTexEnvf(GL_TEXTURE_ENV,
+              GL_TEXTURE_ENV_MODE,
+              GL_REPLACE);
+
+    /* Kreira se prva tekstura */
+    image.read(FILENAME0);
+
+    /* Generisu se identifikatori tekstura. */
+    glGenTextures(2, names);
+
+    glBindTexture(GL_TEXTURE_2D, names[0]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
+                 image.getWidth(), image.getHeight(), 0,
+                 GL_RGB, GL_UNSIGNED_BYTE, image.getPixels());
+
+    /* Iskljucujemo aktivnu teksturu */
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    image.free_image();
 }
 
 void on_keyboard(unsigned char key, int x, int y) {
     switch (key) {
         case 27: /* U slučaju da korisnik pritisne esc program se zaustavlja */
+            glDeleteTextures(2, names);
             exit(0);
         case 'R': /* Pritiskom na R ili r se scena vraca na pocetnu */
         case 'r':
@@ -94,8 +125,10 @@ void on_display() {
     glMultMatrixf(rotation_matrix);
 
     /* Iscrtava se osnovna kocka */
-    MainCube m;
-    m.draw();
+    glBindTexture(GL_TEXTURE_2D, names[0]);
+        MainCube m;
+        m.draw();
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     if (first_draw)
     {
@@ -144,6 +177,8 @@ void on_timer(int value)
 }
 
 void on_mouse(int button, int state, int x, int y) {
+    glDisable(GL_TEXTURE_2D);
+
     if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
         /* U slučaju da je pritisnut levi taster miša pamti se pozicija*/
         mouse_x = x;
@@ -200,7 +235,7 @@ void on_mouse(int button, int state, int x, int y) {
 
             glReadPixels(x, viewport[3] - y, 1, 1, GL_RGB, GL_FLOAT, pixel);
             Color p = {pixel[0], pixel[1], pixel[2]};
-
+            std::cout << "r(" << pixel[0] << " ," << pixel[1] << ", " << pixel[2] << ")" << std::endl;
             auto it = object_colors.cbegin();
             while(it != object_colors.cend())
             {

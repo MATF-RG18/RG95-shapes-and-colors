@@ -10,6 +10,8 @@
 
 #define NUM_OF_OBJECTS 20
 #define MAX_COLORS 20
+#define NUM_OF_VERTEXES 200
+#define EPS 0.05
 
 struct Color {
     float color_r;
@@ -36,7 +38,6 @@ const float b_values[MAX_COLORS] = {0, 1, 0, 0.5, 0, 0.5, 1, 0, 0, 1, 1, 1, 0, 0
 
 void draw_prism(float size, float height);
 void draw_cylinder(float height, float base, bool half);
-void get_coordinates();
 
 class Shape {
 public:

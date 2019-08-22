@@ -3,10 +3,8 @@
 #include <cmath>
 #include <iostream>
 
-#define NUM_OF_VERTEXES 200
-
 unsigned int Shape::next_available_id = 0;
-std::map<int, Coordinates> places_on_main_cube; // Mapira se id u poziciju na glavnoj kocki
+extern std::map<int, Coordinates> places_on_main_cube; // Mapira se id u poziciju na glavnoj kocki
 
 void Sphere::draw()
 {
@@ -757,9 +755,8 @@ bool operator==(const Color& left, const Color& right)
     float d1 = std::fabs(left.color_r - right.color_r);
     float d2 = std::fabs(left.color_g - right.color_g);
     float d3 = std::fabs(left.color_b - right.color_b);
-    float eps = 0.05;
 
-    return d1 <= eps && d2 <= eps && d3 <= eps;
+    return d1 <= EPS && d2 <= EPS && d3 <= EPS;
 }
 
 bool operator<(const Color& left, const Color& right)
@@ -778,9 +775,8 @@ bool operator==(const Coordinates& left, const Coordinates& right)
     float d1 = std::fabs(left.center_x- right.center_x);
     float d2 = std::fabs(left.center_y - right.center_y);
     float d3 = std::fabs(left.center_z - right.center_z);
-    float eps = 0.001;
 
-    return d1 <= eps && d2 <= eps && d3 <= eps;
+    return d1 <= EPS && d2 <= EPS && d3 <= EPS;
 }
 
 bool operator<(const Coordinates& left, const Coordinates& right)
@@ -794,54 +790,3 @@ bool operator<(const Coordinates& left, const Coordinates& right)
     }
 }
 
-void get_coordinates()
-{
-    Coordinates xyz = {-(float)MAIN_CUBE_SIZE/4, (float)MAIN_CUBE_SIZE/4, (float)MAIN_CUBE_SIZE/2 + 0.01};
-    places_on_main_cube.insert(std::pair<int, Coordinates>(0, xyz));
-    xyz = {(float)MAIN_CUBE_SIZE/2 + 0.01, (float)MAIN_CUBE_SIZE/4, -(float)MAIN_CUBE_SIZE/4};
-    places_on_main_cube.insert(std::pair<int, Coordinates>(1, xyz));
-    xyz = {-(float)MAIN_CUBE_SIZE/4, (float)MAIN_CUBE_SIZE/2 + 0.01, -(float)MAIN_CUBE_SIZE/4};
-    places_on_main_cube.insert(std::pair<int, Coordinates>(2, xyz));
-    xyz = {(float)MAIN_CUBE_SIZE/4, (float)MAIN_CUBE_SIZE/4, -(float)MAIN_CUBE_SIZE/2 - 0.01};
-    places_on_main_cube.insert(std::pair<int, Coordinates>(3, xyz));
-    xyz = {-(float)MAIN_CUBE_SIZE/2 - 0.01, (float)MAIN_CUBE_SIZE/4, (float)MAIN_CUBE_SIZE/4};
-    places_on_main_cube.insert(std::pair<int, Coordinates>(4, xyz));
-    xyz = {(float)MAIN_CUBE_SIZE/4, -(float)MAIN_CUBE_SIZE/2 - 0.01, -(float)MAIN_CUBE_SIZE/4};
-    places_on_main_cube.insert(std::pair<int, Coordinates>(5, xyz));
-    xyz = {(float)MAIN_CUBE_SIZE/4, (float)MAIN_CUBE_SIZE/4, (float)MAIN_CUBE_SIZE/2 + 0.01};
-    places_on_main_cube.insert(std::pair<int, Coordinates>(6, xyz));
-    xyz = {(float)MAIN_CUBE_SIZE/2 + 0.01, -(float)MAIN_CUBE_SIZE/4, -(float)MAIN_CUBE_SIZE/4};
-    places_on_main_cube.insert(std::pair<int, Coordinates>(7, xyz));
-    xyz = {(float)MAIN_CUBE_SIZE/4, (float)MAIN_CUBE_SIZE/2 + 0.01, -(float)MAIN_CUBE_SIZE/4};
-    places_on_main_cube.insert(std::pair<int, Coordinates>(8, xyz));
-    xyz = {(float)MAIN_CUBE_SIZE/4, -(float)MAIN_CUBE_SIZE/4, -(float)MAIN_CUBE_SIZE/2 - 0.01};
-    places_on_main_cube.insert(std::pair<int, Coordinates>(9, xyz));
-    xyz = {-(float)MAIN_CUBE_SIZE/2 - 0.01, (float)MAIN_CUBE_SIZE/4, -(float)MAIN_CUBE_SIZE/4};
-    places_on_main_cube.insert(std::pair<int, Coordinates>(10, xyz));
-    xyz = {(float)MAIN_CUBE_SIZE/4, -(float)MAIN_CUBE_SIZE/2 - 0.01, (float)MAIN_CUBE_SIZE/4};
-    places_on_main_cube.insert(std::pair<int, Coordinates>(11, xyz));
-    xyz = {-(float)MAIN_CUBE_SIZE/4, -(float)MAIN_CUBE_SIZE/4, (float)MAIN_CUBE_SIZE/2 + 0.01};
-    places_on_main_cube.insert(std::pair<int, Coordinates>(12, xyz));
-    xyz = {(float)MAIN_CUBE_SIZE/2 + 0.01, -(float)MAIN_CUBE_SIZE/4, (float)MAIN_CUBE_SIZE/4};
-    places_on_main_cube.insert(std::pair<int, Coordinates>(13, xyz));
-    xyz = {(float)MAIN_CUBE_SIZE/4, (float)MAIN_CUBE_SIZE/2 + 0.01, (float)MAIN_CUBE_SIZE/4};
-    places_on_main_cube.insert(std::pair<int, Coordinates>(14, xyz));
-    xyz = {-(float)MAIN_CUBE_SIZE/4, -(float)MAIN_CUBE_SIZE/4, -(float)MAIN_CUBE_SIZE/2 - 0.01};
-    places_on_main_cube.insert(std::pair<int, Coordinates>(15, xyz));
-    xyz = {-(float)MAIN_CUBE_SIZE/2 - 0.01, -(float)MAIN_CUBE_SIZE/4, (float)MAIN_CUBE_SIZE/4};
-    places_on_main_cube.insert(std::pair<int, Coordinates>(16, xyz));
-    xyz = {-(float)MAIN_CUBE_SIZE/4, -(float)MAIN_CUBE_SIZE/2 - 0.01, (float)MAIN_CUBE_SIZE/4};
-    places_on_main_cube.insert(std::pair<int, Coordinates>(17, xyz));
-    xyz = {(float)MAIN_CUBE_SIZE/4, -(float)MAIN_CUBE_SIZE/4, (float)MAIN_CUBE_SIZE/2 + 0.01};
-    places_on_main_cube.insert(std::pair<int, Coordinates>(18, xyz));
-    xyz = {(float)MAIN_CUBE_SIZE/2 + 0.01, (float)MAIN_CUBE_SIZE/4, (float)MAIN_CUBE_SIZE/4};
-    places_on_main_cube.insert(std::pair<int, Coordinates>(19, xyz));
-    xyz = {-(float)MAIN_CUBE_SIZE/4, (float)MAIN_CUBE_SIZE/2 + 0.01, (float)MAIN_CUBE_SIZE/4};
-    places_on_main_cube.insert(std::pair<int, Coordinates>(20, xyz));
-    xyz = {-(float)MAIN_CUBE_SIZE/4, (float)MAIN_CUBE_SIZE/4, -(float)MAIN_CUBE_SIZE/2 - 0.01};
-    places_on_main_cube.insert(std::pair<int, Coordinates>(21, xyz));
-    xyz = {-(float)MAIN_CUBE_SIZE/2 - 0.01, -(float)MAIN_CUBE_SIZE/4, -(float)MAIN_CUBE_SIZE/4};
-    places_on_main_cube.insert(std::pair<int, Coordinates>(22, xyz));
-    xyz = {-(float)MAIN_CUBE_SIZE/4, -(float)MAIN_CUBE_SIZE/2 - 0.01, -(float)MAIN_CUBE_SIZE/4};
-    places_on_main_cube.insert(std::pair<int, Coordinates>(23, xyz));
-}
