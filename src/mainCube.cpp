@@ -1,14 +1,10 @@
 #include "mainCube.hpp"
-#include <iostream>
-#include <GL/glut.h>
-#include <GL/glu.h>
 
 void MainCube::draw() const
 {
-    glColor3f(0.5, 0.5, 0.5);
+    glColor3f(0.62, 0.32, 0.18);
     glPushMatrix();
-        glRotatef(30, 0, 1, 0);
-        glutWireCube(_size);
+        glutSolidCube(_size);
     glPopMatrix();
 }
 

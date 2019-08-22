@@ -1,8 +1,12 @@
 #include "shapes.hpp"
 #include "mainCube.hpp"
 #include <cmath>
+#include <iostream>
 
-unsigned int Shape::id = 0;
+#define NUM_OF_VERTEXES 200
+
+unsigned int Shape::next_available_id = 0;
+std::map<int, Coordinates> places_on_main_cube; // Mapira se id u poziciju na glavnoj kocki
 
 void Sphere::draw()
 {
@@ -12,6 +16,47 @@ void Sphere::draw()
         glTranslatef(_xyz.center_x, _xyz.center_y, _xyz.center_z);
         glutSolidSphere(_size, 30, 30);
         glGetFloatv(GL_MODELVIEW_MATRIX, _system); // Pamti se sistem objekta
+    glPopMatrix();
+}
+
+void Sphere::draw_on_main_cube(Color c) const
+{
+    glColor3f(c.color_r, c.color_g, c.color_b);
+
+    glPushMatrix();
+        Coordinates xyz = places_on_main_cube.find(_id)->second;
+        glTranslatef(xyz.center_x, xyz.center_y, xyz.center_z);
+
+        glBegin(GL_TRIANGLE_FAN);
+        /* Postoje tri grupe strana na osnovu toga koje ose se koriste
+         * za 2d iscrtavanje oblika na glavnoj kocki*/
+        switch(_id % 3)
+        {
+            /* Koriste se x i y osa za iscrtavnje */
+            case 0:
+                for(int i = 0; i <= NUM_OF_VERTEXES; i++)
+                {
+                    glVertex3f(cos(i)*_size, sin(i)*_size, 0);
+                }
+                break;
+            /* Koriste se y i z osa za iscrtavanje*/
+            case 1:
+                for(int i = 0; i <= NUM_OF_VERTEXES; i++)
+                {
+                    glVertex3f(0, cos(i)*_size, sin(i)*_size);
+                }
+                break;
+            /* Koriste se x i z osa za iscrtavanje*/
+            case 2:
+                for(int i = 0; i <= NUM_OF_VERTEXES; i++)
+                {
+                    glVertex3f(cos(i)*_size, 0, sin(i)*_size);
+                }
+                break;
+            default:
+                std::cout << "Entered default in switch; probably error..." << std::endl;
+        }
+        glEnd();
     glPopMatrix();
 }
 
@@ -26,6 +71,53 @@ void Cube::draw()
     glPopMatrix();
 }
 
+void Cube::draw_on_main_cube(Color c) const
+{
+        glColor3f(c.color_r, c.color_g, c.color_b);
+
+        glPushMatrix();
+            Coordinates xyz = places_on_main_cube.find(_id)->second;
+            glTranslatef(xyz.center_x, xyz.center_y, xyz.center_z);
+
+                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+                /* Postoje tri grupe strana na osnovu toga koje ose se koriste za
+                 * 2d iscrtavanje oblika na glavnoj kocki */
+                switch(_id%3)
+                {
+                    /* Koriste se x i y osa za iscrtavnje */
+                    case 0:
+                        glBegin(GL_QUADS);
+                            glVertex3f(-_size/2, _size/2, 0);
+                            glVertex3f(-_size/2, -_size/2, 0);
+                            glVertex3f(_size/2, -_size/2, 0);
+                            glVertex3f(_size/2, _size/2, 0);
+                        glEnd();
+                        break;
+                    /* Koriste se y i z osa za iscrtavanje*/
+                    case 1:
+                        glBegin(GL_QUADS);
+                            glVertex3f(0, _size/2, _size/2);
+                            glVertex3f(0, -_size/2, _size/2);
+                            glVertex3f(0, -_size/2, -_size/2);
+                            glVertex3f(0, _size/2, -_size/2);
+                        glEnd();
+                        break;
+                    /* Koriste se x i z osa za iscrtavanje*/
+                    case 2:
+                        glBegin(GL_QUADS);
+                            glVertex3f(-_size/2, 0, _size/2);
+                            glVertex3f(_size/2, 0, _size/2);
+                            glVertex3f(_size/2, 0, -_size/2);
+                            glVertex3f(-_size/2, 0, -_size/2);
+                        glEnd();
+                        break;
+                    default:
+                        std::cout << "Entered default in switch; probably error..." << std::endl;
+                }
+        glPopMatrix();
+}
+
 void TriangularPrism::draw()
 {
     glColor3f(_c.color_r, _c.color_g, _c.color_b);
@@ -37,6 +129,44 @@ void TriangularPrism::draw()
     glPopMatrix();
 }
 
+void TriangularPrism::draw_on_main_cube(Color c) const
+{
+    glColor3f(c.color_r, c.color_g, c.color_b);
+
+    glPushMatrix();
+        Coordinates xyz = places_on_main_cube.find(_id)->second;
+        glTranslatef(xyz.center_x, xyz.center_y, xyz.center_z);
+
+        glBegin(GL_TRIANGLES);
+            /* Postoje tri grupe strana na osnovu toga koje ose se koriste za
+                 * 2d iscrtavanje oblika na glavnoj kocki */
+            switch(_id%3)
+            {
+                /* Koriste se x i y osa za iscrtavnje */
+                case 0:
+                    glVertex3f(0, _size*sqrt(3)/3, 0);
+                    glVertex3f(-_size/2, -_size*sqrt(3)/6, 0);
+                    glVertex3f(_size/2, -_size*sqrt(3)/6, 0);
+                    break;
+                /* Koriste se y i z osa za iscrtavanje*/
+                case 1:
+                    glVertex3f(0, _size*sqrt(3)/3, 0);
+                    glVertex3f(0, -_size*sqrt(3)/6, _size/2);
+                    glVertex3f(0, -_size*sqrt(3)/6, -_size/2);
+                    break;
+                /* Koriste se x i z osa za iscrtavanje*/
+                case 2:
+                    glVertex3f(0, 0, -_size*sqrt(3)/3);
+                    glVertex3f(-_size/2, 0, _size*sqrt(3)/6);
+                    glVertex3f(_size/2, 0, _size*sqrt(3)/6);
+                    break;
+                default:
+                    std::cout << "Entered default in switch; probably error..." << std::endl;
+            }
+        glEnd();
+    glPopMatrix();
+}
+
 void Cylinder::draw()
 {
     glColor3f(_c.color_r, _c.color_g, _c.color_b);
@@ -45,6 +175,47 @@ void Cylinder::draw()
         glTranslatef(_xyz.center_x, _xyz.center_y, _xyz.center_z);
         draw_cylinder(_height, _size, false);
         glGetFloatv(GL_MODELVIEW_MATRIX, _system);
+    glPopMatrix();
+}
+
+void Cylinder::draw_on_main_cube(Color c) const
+{
+    glColor3f(c.color_r, c.color_g, c.color_b);
+
+    glPushMatrix();
+        Coordinates xyz = places_on_main_cube.find(_id)->second;
+        glTranslatef(xyz.center_x, xyz.center_y, xyz.center_z);
+
+        glBegin(GL_TRIANGLE_FAN);
+            /* Postoje tri grupe strana na osnovu toga koje ose se koriste
+             * za 2d iscrtavanje oblika na glavnoj kocki*/
+            switch(_id%3)
+            {
+                /* Koriste se x i y osa za iscrtavnje */
+                case 0:
+                    for(int i = 0; i <= NUM_OF_VERTEXES; i++)
+                    {
+                        glVertex3f(cos(i)*_size, sin(i)*_size, 0);
+                    }
+                    break;
+                    /* Koriste se y i z osa za iscrtavanje*/
+                case 1:
+                    for(int i = 0; i <= NUM_OF_VERTEXES; i++)
+                    {
+                        glVertex3f(0, cos(i)*_size, sin(i)*_size);
+                    }
+                    break;
+                    /* Koriste se x i z osa za iscrtavanje*/
+                case 2:
+                    for(int i = 0; i <= NUM_OF_VERTEXES; i++)
+                    {
+                        glVertex3f(cos(i)*_size, 0, sin(i)*_size);
+                    }
+                    break;
+                default:
+                    std::cout << "Entered default in switch; probably error..." << std::endl;
+            }
+        glEnd();
     glPopMatrix();
 }
 
@@ -132,6 +303,56 @@ void Star::draw()
     glPopMatrix();
 }
 
+void Star::draw_on_main_cube(Color c) const
+{
+    glColor3f(c.color_r, c.color_g, c.color_b);
+
+    glPushMatrix();
+        Coordinates xyz = places_on_main_cube.find(_id)->second;
+        glTranslatef(xyz.center_x, xyz.center_y, xyz.center_z);
+
+        glBegin(GL_TRIANGLES);
+            /* Postoje tri grupe strana na osnovu toga koje ose se koriste za
+                 * 2d iscrtavanje oblika na glavnoj kocki */
+            switch(_id%3)
+            {
+                /* Koriste se x i y osa za iscrtavnje */
+                case 0:
+                    glVertex3f(-3*_size/2, _size*sqrt(3)/2, 0);
+                    glVertex3f(0, -_size*sqrt(3), 0);
+                    glVertex3f(3*_size/2, _size*sqrt(3)/2, 0);
+
+                    glVertex3f(0, _size*sqrt(3), 0);
+                    glVertex3f(-3*_size/2, -_size*sqrt(3)/2, 0);
+                    glVertex3f(3*_size/2, -_size*sqrt(3)/2, 0);
+                    break;
+                    /* Koriste se y i z osa za iscrtavanje*/
+                case 1:
+                    glVertex3f(0, _size*sqrt(3)/2, 3*_size/2);
+                    glVertex3f(0, -_size*sqrt(3), 0);
+                    glVertex3f(0, _size*sqrt(3)/2, -3*_size/2);
+
+                    glVertex3f(0, _size*sqrt(3), 0);
+                    glVertex3f(0, -_size*sqrt(3)/2, 3*_size/2);
+                    glVertex3f(0, -_size*sqrt(3)/2, -3*_size/2);
+                    break;
+                    /* Koriste se x i z osa za iscrtavanje*/
+                case 2:
+                    glVertex3f(-3*_size/2, 0, -_size*sqrt(3)/2);
+                    glVertex3f(0, 0, _size*sqrt(3));
+                    glVertex3f(3*_size/2, 0, -_size*sqrt(3)/2);
+
+                    glVertex3f(0, 0, -_size*sqrt(3));
+                    glVertex3f(-3*_size/2, 0, _size*sqrt(3)/2);
+                    glVertex3f(3*_size/2, 0, _size*sqrt(3)/2);
+                    break;
+                default:
+                    std::cout << "Entered default in switch; probably error..." << std::endl;
+            }
+        glEnd();
+    glPopMatrix();
+}
+
 /* Srce se crta iz tri dela, trostrane prizme i dva poluvaljka */
 void Heart::draw()
 {
@@ -161,6 +382,163 @@ void Heart::draw()
     glPopMatrix();
 }
 
+void Heart::draw_on_main_cube(Color c) const
+{
+    glColor3f(c.color_r, c.color_g, c.color_b);
+
+    glPushMatrix();
+        Coordinates xyz = places_on_main_cube.find(_id)->second;
+        glTranslatef(xyz.center_x, xyz.center_y, xyz.center_z);
+
+        /* Postoje tri grupe strana na osnovu toga koje ose se koriste za
+             * 2d iscrtavanje oblika na glavnoj kocki */
+        switch(_id%3)
+        {
+            /* Koriste se x i y osa za iscrtavnje */
+            case 0:
+                glBegin(GL_TRIANGLES);
+                    glVertex3f(0, -_size*sqrt(3)/3, 0);
+                    glVertex3f(_size/2, _size*sqrt(3)/6, 0);
+                    glVertex3f(-_size/2, _size*sqrt(3)/6, 0);
+                glEnd();
+
+                glPushMatrix();
+                    glTranslatef(_size/4, _size*sqrt(3)/6, 0);
+                    glBegin(GL_TRIANGLE_FAN);
+                        glVertex3f(0, 0, 0);
+                        glVertex3f(_size/4, 0, 0);
+                        for(int i = 0; i <= NUM_OF_VERTEXES; i++)
+                        {
+                            if(sin(i) < 0)
+                            {
+                                glVertex3f(cos(i)*_size/4, -sin(i)*_size/4, 0);
+                                continue;
+                            }
+
+                            glVertex3f(cos(i)*_size/4, sin(i)*_size/4, 0);
+                        }
+                        glVertex3f(-_size/4, 0, 0);
+                    glEnd();
+                glPopMatrix();
+
+                glPushMatrix();
+                    glTranslatef(-_size/4, _size*sqrt(3)/6, 0);
+                    glBegin(GL_TRIANGLE_FAN);
+                        glVertex3f(0, 0, 0);
+                        glVertex3f(_size/4, 0, 0);
+                        for(int i = 0; i <= NUM_OF_VERTEXES; i++)
+                        {
+                            if(sin(i) < 0)
+                            {
+                                glVertex3f(cos(i)*_size/4, -sin(i)*_size/4, 0);
+                                continue;
+                            }
+
+                            glVertex3f(cos(i)*_size/4, sin(i)*_size/4, 0);
+                        }
+                        glVertex3f(-_size/4, 0, 0);
+                    glEnd();
+                glPopMatrix();
+                break;
+                /* Koriste se y i z osa za iscrtavanje*/
+            case 1:
+                glBegin(GL_TRIANGLES);
+                    glVertex3f(0, -_size*sqrt(3)/3, 0);
+                    glVertex3f(0, _size*sqrt(3)/6, -_size/2);
+                    glVertex3f(0, _size*sqrt(3)/6, _size/2);
+                glEnd();
+
+                glPushMatrix();
+                    glTranslatef(0, _size*sqrt(3)/6, -_size/4);
+                    glBegin(GL_TRIANGLE_FAN);
+                        glVertex3f(0, 0, 0);
+                        glVertex3f(0, 0, -_size/4);
+                        for(int i = 0; i <= NUM_OF_VERTEXES; i++)
+                        {
+                            if(sin(i) < 0)
+                            {
+                                glVertex3f(0, -sin(i)*_size/4, cos(i)*_size/4);
+                                continue;
+                            }
+
+                            glVertex3f(0, sin(i)*_size/4, cos(i)*_size/4);
+                        }
+                        glVertex3f(0, 0, _size/4);
+                    glEnd();
+                glPopMatrix();
+
+                glPushMatrix();
+                    glTranslatef(0, _size*sqrt(3)/6, _size/4);
+                    glBegin(GL_TRIANGLE_FAN);
+                        glVertex3f(0, 0, 0);
+                        glVertex3f(0, 0, -_size/4);
+                        for(int i = 0; i <= NUM_OF_VERTEXES; i++)
+                        {
+                            if(sin(i) < 0)
+                            {
+                                glVertex3f(0, -sin(i)*_size/4, cos(i)*_size/4);
+                                continue;
+                            }
+
+                            glVertex3f(0, sin(i)*_size/4, cos(i)*_size/4);
+                        }
+                        glVertex3f(0, 0, _size/4);
+                    glEnd();
+                glPopMatrix();
+                break;
+                /* Koriste se x i z osa za iscrtavanje*/
+            case 2:
+                glBegin(GL_TRIANGLES);
+                    glVertex3f(0, 0, _size*sqrt(3)/3);
+                    glVertex3f(_size/2, 0, -_size*sqrt(3)/6);
+                    glVertex3f(-_size/2, 0, -_size*sqrt(3)/6);
+                glEnd();
+
+                glPushMatrix();
+                    glTranslatef(_size/4, 0, -_size*sqrt(3)/6);
+                    glBegin(GL_TRIANGLE_FAN);
+                        glVertex3f(0, 0, 0);
+                        glVertex3f(_size/4, 0, 0);
+                        for(int i = 0; i <= NUM_OF_VERTEXES; i++)
+                        {
+                            if(sin(i) < 0)
+                            {
+                                glVertex3f(cos(i)*_size/4, 0, sin(i)*_size/4);
+                                continue;
+                            }
+
+                            glVertex3f(cos(i)*_size/4, 0, -sin(i)*_size/4);
+                        }
+                        glVertex3f(-_size/4, 0, 0);
+                    glEnd();
+                glPopMatrix();
+
+                glPushMatrix();
+                    glTranslatef(-_size/4, 0, -_size*sqrt(3)/6);
+                    glBegin(GL_TRIANGLE_FAN);
+                        glVertex3f(0, 0, 0);
+                        glVertex3f(_size/4, 0, 0);
+                        for(int i = 0; i <= NUM_OF_VERTEXES; i++)
+                        {
+                            if(sin(i) < 0)
+                            {
+                                glVertex3f(cos(i)*_size/4, 0, sin(i)*_size/4);
+                                continue;
+                            }
+
+                            glVertex3f(cos(i)*_size/4, 0, -sin(i)*_size/4);
+                        }
+                        glVertex3f(-_size/4, 0, 0);
+                    glEnd();
+                glPopMatrix();
+
+                break;
+            default:
+                std::cout << "Entered default in switch; probably error..." << std::endl;
+        }
+    glPopMatrix();
+}
+
 /* Cvet se crta iz 6 valjaka koji predtavljaju latice */
 void Flower::draw()
 {
@@ -171,32 +549,124 @@ void Flower::draw()
 
         // Iscrtava se centralni valjak
         glPushMatrix();
-            draw_cylinder(_size-0.1, _size*4/3, false);
+            draw_cylinder(_size, _size*4/3, false);
         glPopMatrix();
 
-        glPushMatrix();
-            glTranslatef(_size*4/3, 0, _size);
-            draw_cylinder(_size-0.1, _size, false);
-        glPopMatrix();
+        for(int i = 0; i < 5; i++)
+        {
+            double t = i * (2 * M_PI) / 5;
+            float x = _size * 3 / 2 * cos(t);
+            float z = _size * 3 / 2 * sin(t);
 
-        glPushMatrix();
-            glTranslatef(_size*4/3, 0, -_size);
-            draw_cylinder(_size-0.1, _size, false);
-        glPopMatrix();
-
-        glPushMatrix();
-            glTranslatef(0, 0, _size*4/3);
-            draw_cylinder(_size-0.1, _size, false);
-        glPopMatrix();
-
-        //TODO: Popraviti cvet
-//
-//        glPushMatrix();
-//            glTranslatef(_size/2, 0, _size);
-//            draw_cylinder(_size-0.1, _size, false);
-//        glPopMatrix();
+            glPushMatrix();
+                glTranslatef(x, 0, z);
+                draw_cylinder(_size, _size, false);
+            glPopMatrix();
+        }
 
         glGetFloatv(GL_MODELVIEW_MATRIX, _system);
+    glPopMatrix();
+}
+
+void Flower::draw_on_main_cube(Color c) const
+{
+    glColor3f(c.color_r, c.color_g, c.color_b);
+
+    glPushMatrix();
+        Coordinates xyz = places_on_main_cube.find(_id)->second;
+        glTranslatef(xyz.center_x, xyz.center_y, xyz.center_z);
+
+        /* Postoje tri grupe strana na osnovu toga koje ose se koriste za
+             * 2d iscrtavanje oblika na glavnoj kocki */
+        switch(_id%3)
+        {
+            /* Koriste se x i y osa za iscrtavnje */
+            case 0:
+                glBegin(GL_TRIANGLE_FAN);
+                    glVertex3f(0, 0, 0);
+                    for(int i = 0; i <= NUM_OF_VERTEXES; i++)
+                    {
+                        glVertex3f(cos(i)*_size * 4/3, sin(i)*_size * 4/3, 0);
+                    }
+                glEnd();
+
+                for(int i = 0; i < 5; i++)
+                {
+                    double t = i * (2 * M_PI) / 5;
+                    float x = _size * 3 / 2 * cos(t);
+                    float y = _size * 3 / 2 * sin(t);
+
+                    glPushMatrix();
+                        glTranslatef(x, y, 0);
+                        glBegin(GL_TRIANGLE_FAN);
+                            glVertex3f(0, 0, 0);
+                            for(int i = 0; i <= NUM_OF_VERTEXES; i++)
+                            {
+                                glVertex3f(cos(i)*_size, sin(i)*_size, 0);
+                            }
+                        glEnd();
+                    glPopMatrix();
+                }
+                break;
+                /* Koriste se y i z osa za iscrtavanje*/
+            case 1:
+                glBegin(GL_TRIANGLE_FAN);
+                    glVertex3f(0, 0, 0);
+                    for(int i = 0; i <= NUM_OF_VERTEXES; i++)
+                    {
+                        glVertex3f(0, sin(i)*_size * 4/3, cos(i)*_size * 4/3);
+                    }
+                glEnd();
+
+                for(int i = 0; i < 5; i++)
+                {
+                    double t = i * (2 * M_PI) / 5;
+                    float z = _size * 3 / 2 * cos(t);
+                    float y = _size * 3 / 2 * sin(t);
+
+                    glPushMatrix();
+                        glTranslatef(0, y, z);
+                        glBegin(GL_TRIANGLE_FAN);
+                            glVertex3f(0, 0, 0);
+                            for(int i = 0; i <= NUM_OF_VERTEXES; i++)
+                            {
+                                glVertex3f(0, sin(i)*_size, cos(i)*_size);
+                            }
+                        glEnd();
+                    glPopMatrix();
+                }
+                break;
+                /* Koriste se x i z osa za iscrtavanje*/
+            case 2:
+                glBegin(GL_TRIANGLE_FAN);
+                    glVertex3f(0, 0, 0);
+                    for(int i = 0; i <= NUM_OF_VERTEXES; i++)
+                    {
+                        glVertex3f(cos(i)*_size * 4/3, 0, sin(i)*_size * 4/3);
+                    }
+                glEnd();
+
+                for(int i = 0; i < 5; i++)
+                {
+                    double t = i * (2 * M_PI) / 5;
+                    float x = _size * 3 / 2 * cos(t);
+                    float z = _size * 3 / 2 * sin(t);
+
+                    glPushMatrix();
+                        glTranslatef(x, 0, z);
+                        glBegin(GL_TRIANGLE_FAN);
+                            glVertex3f(0, 0, 0);
+                            for(int i = 0; i <= NUM_OF_VERTEXES; i++)
+                            {
+                                glVertex3f(cos(i)*_size, 0, sin(i)*_size);
+                            }
+                        glEnd();
+                    glPopMatrix();
+                }
+                break;
+            default:
+                std::cout << "Entered default in switch; probably error..." << std::endl;
+        }
     glPopMatrix();
 }
 
@@ -268,7 +738,7 @@ void draw_cylinder(float height, float base, bool half)
     {
         glBegin(GL_TRIANGLE_FAN);
         glVertex3f(0, i, 0);
-        for(j = 0; j <= 365; j++)
+        for(j = 0; j <= NUM_OF_VERTEXES; j++)
         {
             if(sin(j) < 0 && half)
             {
@@ -287,7 +757,7 @@ bool operator==(const Color& left, const Color& right)
     float d1 = std::fabs(left.color_r - right.color_r);
     float d2 = std::fabs(left.color_g - right.color_g);
     float d3 = std::fabs(left.color_b - right.color_b);
-    float eps = 0.01;
+    float eps = 0.05;
 
     return d1 <= eps && d2 <= eps && d3 <= eps;
 }
@@ -303,3 +773,75 @@ bool operator<(const Color& left, const Color& right)
     }
 }
 
+bool operator==(const Coordinates& left, const Coordinates& right)
+{
+    float d1 = std::fabs(left.center_x- right.center_x);
+    float d2 = std::fabs(left.center_y - right.center_y);
+    float d3 = std::fabs(left.center_z - right.center_z);
+    float eps = 0.001;
+
+    return d1 <= eps && d2 <= eps && d3 <= eps;
+}
+
+bool operator<(const Coordinates& left, const Coordinates& right)
+{
+    if (left.center_x == right.center_x && left.center_y == right.center_y) {
+        return left.center_z < right.center_z;
+    } else if (left.center_x == right.center_x) {
+        return left.center_y < right.center_y;
+    } else {
+        return left.center_x < right.center_x;
+    }
+}
+
+void get_coordinates()
+{
+    Coordinates xyz = {-(float)MAIN_CUBE_SIZE/4, (float)MAIN_CUBE_SIZE/4, (float)MAIN_CUBE_SIZE/2 + 0.01};
+    places_on_main_cube.insert(std::pair<int, Coordinates>(0, xyz));
+    xyz = {(float)MAIN_CUBE_SIZE/2 + 0.01, (float)MAIN_CUBE_SIZE/4, -(float)MAIN_CUBE_SIZE/4};
+    places_on_main_cube.insert(std::pair<int, Coordinates>(1, xyz));
+    xyz = {-(float)MAIN_CUBE_SIZE/4, (float)MAIN_CUBE_SIZE/2 + 0.01, -(float)MAIN_CUBE_SIZE/4};
+    places_on_main_cube.insert(std::pair<int, Coordinates>(2, xyz));
+    xyz = {(float)MAIN_CUBE_SIZE/4, (float)MAIN_CUBE_SIZE/4, -(float)MAIN_CUBE_SIZE/2 - 0.01};
+    places_on_main_cube.insert(std::pair<int, Coordinates>(3, xyz));
+    xyz = {-(float)MAIN_CUBE_SIZE/2 - 0.01, (float)MAIN_CUBE_SIZE/4, (float)MAIN_CUBE_SIZE/4};
+    places_on_main_cube.insert(std::pair<int, Coordinates>(4, xyz));
+    xyz = {(float)MAIN_CUBE_SIZE/4, -(float)MAIN_CUBE_SIZE/2 - 0.01, -(float)MAIN_CUBE_SIZE/4};
+    places_on_main_cube.insert(std::pair<int, Coordinates>(5, xyz));
+    xyz = {(float)MAIN_CUBE_SIZE/4, (float)MAIN_CUBE_SIZE/4, (float)MAIN_CUBE_SIZE/2 + 0.01};
+    places_on_main_cube.insert(std::pair<int, Coordinates>(6, xyz));
+    xyz = {(float)MAIN_CUBE_SIZE/2 + 0.01, -(float)MAIN_CUBE_SIZE/4, -(float)MAIN_CUBE_SIZE/4};
+    places_on_main_cube.insert(std::pair<int, Coordinates>(7, xyz));
+    xyz = {(float)MAIN_CUBE_SIZE/4, (float)MAIN_CUBE_SIZE/2 + 0.01, -(float)MAIN_CUBE_SIZE/4};
+    places_on_main_cube.insert(std::pair<int, Coordinates>(8, xyz));
+    xyz = {(float)MAIN_CUBE_SIZE/4, -(float)MAIN_CUBE_SIZE/4, -(float)MAIN_CUBE_SIZE/2 - 0.01};
+    places_on_main_cube.insert(std::pair<int, Coordinates>(9, xyz));
+    xyz = {-(float)MAIN_CUBE_SIZE/2 - 0.01, (float)MAIN_CUBE_SIZE/4, -(float)MAIN_CUBE_SIZE/4};
+    places_on_main_cube.insert(std::pair<int, Coordinates>(10, xyz));
+    xyz = {(float)MAIN_CUBE_SIZE/4, -(float)MAIN_CUBE_SIZE/2 - 0.01, (float)MAIN_CUBE_SIZE/4};
+    places_on_main_cube.insert(std::pair<int, Coordinates>(11, xyz));
+    xyz = {-(float)MAIN_CUBE_SIZE/4, -(float)MAIN_CUBE_SIZE/4, (float)MAIN_CUBE_SIZE/2 + 0.01};
+    places_on_main_cube.insert(std::pair<int, Coordinates>(12, xyz));
+    xyz = {(float)MAIN_CUBE_SIZE/2 + 0.01, -(float)MAIN_CUBE_SIZE/4, (float)MAIN_CUBE_SIZE/4};
+    places_on_main_cube.insert(std::pair<int, Coordinates>(13, xyz));
+    xyz = {(float)MAIN_CUBE_SIZE/4, (float)MAIN_CUBE_SIZE/2 + 0.01, (float)MAIN_CUBE_SIZE/4};
+    places_on_main_cube.insert(std::pair<int, Coordinates>(14, xyz));
+    xyz = {-(float)MAIN_CUBE_SIZE/4, -(float)MAIN_CUBE_SIZE/4, -(float)MAIN_CUBE_SIZE/2 - 0.01};
+    places_on_main_cube.insert(std::pair<int, Coordinates>(15, xyz));
+    xyz = {-(float)MAIN_CUBE_SIZE/2 - 0.01, -(float)MAIN_CUBE_SIZE/4, (float)MAIN_CUBE_SIZE/4};
+    places_on_main_cube.insert(std::pair<int, Coordinates>(16, xyz));
+    xyz = {-(float)MAIN_CUBE_SIZE/4, -(float)MAIN_CUBE_SIZE/2 - 0.01, (float)MAIN_CUBE_SIZE/4};
+    places_on_main_cube.insert(std::pair<int, Coordinates>(17, xyz));
+    xyz = {(float)MAIN_CUBE_SIZE/4, -(float)MAIN_CUBE_SIZE/4, (float)MAIN_CUBE_SIZE/2 + 0.01};
+    places_on_main_cube.insert(std::pair<int, Coordinates>(18, xyz));
+    xyz = {(float)MAIN_CUBE_SIZE/2 + 0.01, (float)MAIN_CUBE_SIZE/4, (float)MAIN_CUBE_SIZE/4};
+    places_on_main_cube.insert(std::pair<int, Coordinates>(19, xyz));
+    xyz = {-(float)MAIN_CUBE_SIZE/4, (float)MAIN_CUBE_SIZE/2 + 0.01, (float)MAIN_CUBE_SIZE/4};
+    places_on_main_cube.insert(std::pair<int, Coordinates>(20, xyz));
+    xyz = {-(float)MAIN_CUBE_SIZE/4, (float)MAIN_CUBE_SIZE/4, -(float)MAIN_CUBE_SIZE/2 - 0.01};
+    places_on_main_cube.insert(std::pair<int, Coordinates>(21, xyz));
+    xyz = {-(float)MAIN_CUBE_SIZE/2 - 0.01, -(float)MAIN_CUBE_SIZE/4, -(float)MAIN_CUBE_SIZE/4};
+    places_on_main_cube.insert(std::pair<int, Coordinates>(22, xyz));
+    xyz = {-(float)MAIN_CUBE_SIZE/4, -(float)MAIN_CUBE_SIZE/2 - 0.01, -(float)MAIN_CUBE_SIZE/4};
+    places_on_main_cube.insert(std::pair<int, Coordinates>(23, xyz));
+}

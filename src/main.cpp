@@ -1,21 +1,25 @@
-#include <GL/glut.h>
 #include <GL/glu.h>
+#include <GL/gl.h>
 #include <iostream>
 #include <memory>
 #include <cmath>
-#include <random>
 #include <map>
 #include "mainCube.hpp"
 #include "shapes.hpp"
+#include "firstScene.hpp"
+
+#define TIMER_ID 0
 
 int window_w, window_h; // Pri promeni pamti se širina i visina prozora
 int mouse_x = 0, mouse_y = 0; // Pri promeni pamti se pozicija miša
 float rotation_matrix[16];
-bool first = true; // Vrednost koja oznacava da li se vrsi prvi pozi funkcije display ili ne
-std::shared_ptr<Shape> objects[NUM_OF_OBJECTS]; // Niz objekata na sceni
-std::map<Color, int> object_colors; // Mapira se boja u indeks u nizu objekata. Koristi se za selekciju.
-int selected = -1; // Indeks objekta koji je selektovan
-bool picked = false; // Indikator da li je korisnik nesto pokupio ili nije
+float selection_matrix[16];
+bool first_draw = true; // Vrednost koja oznacava da li se vrsi prvi pozi funkcije display ili ne
+extern std::shared_ptr<Shape> objects[NUM_OF_OBJECTS]; // Niz objekata na sceni
+extern std::map<Color, int> object_colors; // Mapira se boja u indeks u nizu objekata. Koristi se za selekciju.
+extern std::map<Color, int> object_colors_on_cube; // Mapira se boja u indeks u nizu objekata za objekte na glavnoj kocki. Koristi se za selekciju.
+int selected_object = -1; // Indeks objekta koji je selektovan
+bool waiting_for_another_click = false; // Koristi se za registrovanje dvoklika
 
 void on_display();
 void initialize();
@@ -23,7 +27,9 @@ void on_keyboard(unsigned char key, int x, int y);
 void on_reshape(int width, int height);
 void on_mouse(int button, int s, int x, int y);
 void on_motion(int x, int y); // Pomeraj misa dok je dugme selektovano
-void on_passive_motion(int x, int y); // Pomeraj misa dok nijedno dugme nije selektovano
+void on_timer(int value); // Tajmer za registrovanje dvoklika
+
+extern std::map<int, Coordinates> places_on_main_cube;
 
 int main(int argc, char **argv) {
     glutInit(&argc, argv);
@@ -32,7 +38,7 @@ int main(int argc, char **argv) {
     glutInitWindowSize(800, 600);
     glutInitWindowPosition(0, 100);
     glutCreateWindow("Shapes and colors");
-//    glutFullScreen();
+    glutFullScreen();
 
     initialize();
 
@@ -41,7 +47,6 @@ int main(int argc, char **argv) {
     glutReshapeFunc(on_reshape);
     glutMouseFunc(on_mouse);
     glutMotionFunc(on_motion);
-    glutPassiveMotionFunc(on_passive_motion);
 
     glutMainLoop();
 
@@ -55,10 +60,12 @@ void initialize() {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_NORMALIZE);
 
-    /* Vrsi se inicijalizacija matrice rotacije na jedinicnu matricu */
+    /* Vrsi se inicijalizacija matrice rotacije i matrice selekcije na jedinicnu matricu */
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glGetFloatv(GL_MODELVIEW_MATRIX, rotation_matrix);
+
+    get_coordinates(); // Koordinate na kocki
 }
 
 void on_keyboard(unsigned char key, int x, int y) {
@@ -90,58 +97,24 @@ void on_display() {
     MainCube m;
     m.draw();
 
-    if (first) {
+    if (first_draw)
+    {
         /* Prvi put se pravi niz objekata */
+        FirstScene first = FirstScene::getInstance();
+        first.draw();
 
-        srand(time(NULL));
-
-        for (int i = 0; i < NUM_OF_OBJECTS; i++) {
-            float size = ((float) rand() / (RAND_MAX)) * 0.5 + 0.4; // Uzima se slucajna velicia iz opsega [0.4, 0.9)
-
-            /* Parametrizuje se krug na kom se nalaze objekti, kako bi se ravnomerno rasporedili */
-            float t = i * (2 * M_PI) / NUM_OF_OBJECTS;
-            float x = 4 * cos(t);
-            float z = 4 * sin(t);
-            Coordinates xyz = {x, 0, z};
-
-            /* Bira se nasumicna vrsta objekta */
-            int k = ((int) floor(((float) rand() / (RAND_MAX)) * 7) + i) % 7;
-            switch (k) {
-                case 0:
-                    objects[i] = std::make_shared<Sphere>(xyz, size);
-                    break;
-                case 1:
-                    objects[i] = std::make_shared<Cube>(xyz, size + 0.3);
-                    break;
-                case 2:
-                    objects[i] = std::make_shared<TriangularPrism>(xyz, size + 0.4);
-                    break;
-                case 3:
-                    objects[i] = std::make_shared<Cylinder>(xyz, size - 0.3);
-                    break;
-                case 4:
-                    objects[i] = std::make_shared<Heart>(xyz, size + 0.4);
-                    break;
-                case 5:
-                    size = ((float) rand() / (RAND_MAX)) * 0.2 + 0.25;
-                    objects[i] = std::make_shared<Flower>(xyz, size);
-                    break;
-                case 6:
-                    size = ((float) rand() / (RAND_MAX)) * 0.25 + 0.4;
-                    objects[i] = std::make_shared<Star>(xyz, size);
-                    break;
-                default:
-                    objects[i] = std::make_shared<Sphere>(xyz, size);
-            }
-
-            object_colors.insert(std::pair<Color, int>(objects[i]->_c, i));
-            objects[i]->draw();
-        }
-
-        first = false;
+        first_draw = false;
     } else {
-        for (int i = 0; i < NUM_OF_OBJECTS; i++) {
-            objects[i]->draw();
+        for (auto& object : objects) {
+            object->draw();
+
+            float r = object->_c.color_r - 0.01;
+            float g = object->_c.color_g - 0.01;
+            float b = object->_c.color_b - 0.01;
+
+            Color c = {r, g, b};
+
+            object->draw_on_main_cube(c);
         }
     }
 
@@ -162,47 +135,101 @@ void on_reshape(int width, int height) {
     glLoadIdentity();
 }
 
+void on_timer(int value)
+{
+    if(value != TIMER_ID)
+        return;
+
+    waiting_for_another_click = false;
+}
+
 void on_mouse(int button, int state, int x, int y) {
-    /* U slučaju da je pritisnut levi taster miša pamti se pozicija*/
     if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+        /* U slučaju da je pritisnut levi taster miša pamti se pozicija*/
         mouse_x = x;
         mouse_y = y;
 
-        if(picked && selected != -1)
+        /* Dvoklikom na ojbekte se oni selektuju*/
+        if(!waiting_for_another_click)
         {
-            std::cout << "Proveravam da li stavlja na dobro mesto i ostavljam objekat tu" << std::endl;
-            picked = false;
+            waiting_for_another_click = true;
+            glutTimerFunc(250, on_timer, TIMER_ID);
             return;
         }
 
-        float pixel[3];
-        GLint viewport[4];
-        glGetIntegerv(GL_VIEWPORT, viewport);
-
-        glReadPixels(x, viewport[3] - y, 1, 1, GL_RGB, GL_FLOAT, pixel);
-        Color p = {pixel[0], pixel[1], pixel[2]};
-
-        auto it = object_colors.cbegin();
-        while(it != object_colors.cend())
+        if(waiting_for_another_click)
         {
-            if(!picked)
+            float pixel[3];
+            GLint viewport[4];
+            glGetIntegerv(GL_VIEWPORT, viewport);
+
+            /* Ako je nešto selektovano, proverava se samo da li je sledeći selektovani objekat na kocki;
+             * ako nije zna se da je greška u pitanju. Kada ništa nije selektovano promenljiva
+             * selected_object ima vrednost -1. */
+            if(selected_object != -1)
             {
-                if (it->first == p) {
-                    selected = it->second;
-                    picked = true;
-                    break;
+                glReadPixels(x, viewport[3] - y, 1, 1, GL_RGB, GL_FLOAT, pixel);
+                Color p = {pixel[0], pixel[1], pixel[2]};
+                std::cout << "r(" << pixel[0] << " ," << pixel[1] << ", " << pixel[2] << ")" << std::endl;
+
+                int selected = -1;
+                auto it = object_colors_on_cube.cbegin();
+                while(it != object_colors_on_cube.cend())
+                {
+                    if (it->first == p)
+                    {
+                        selected = it->second;
+                        std::cout << selected_object << std::endl;
+                        break;
+                    }
+
+                    it++;
                 }
+
+                if(selected != -1) {
+                    std::cout << "Proveravam da li su upareni" << std::endl;
+                    selected_object = -1;
+                }
+                else {
+                    selected_object = -1;
+                    std::cout << selected_object << std::endl;
+                }
+
+                return;
             }
 
-            it++;
+            glReadPixels(x, viewport[3] - y, 1, 1, GL_RGB, GL_FLOAT, pixel);
+            Color p = {pixel[0], pixel[1], pixel[2]};
+
+            auto it = object_colors.cbegin();
+            while(it != object_colors.cend())
+            {
+                if(selected_object == -1)
+                {
+                    if (it->first == p) {
+                        selected_object = it->second;
+
+                        glMatrixMode(GL_MODELVIEW);
+                        glPushMatrix();
+                            glLoadMatrixf(objects[selected_object]->_system);
+                            glGetFloatv(GL_MODELVIEW_MATRIX, selection_matrix);
+                            std::cout << selected_object << std::endl;
+                        glPopMatrix();
+                        break;
+                    }
+                }
+
+                it++;
+            }
         }
     }
 }
 
+/* Držanjem pritisnutog levog tastera miša rotira se glavna kocka sa objektima */
 void on_motion(int x, int y) {
     int new_x, new_y;
 
-    /* Izracunavaju se promene pozicije pokazivaca misa */
+    /* Izracunavaju se promene pozicije pokazivaca miša */
     new_x = x - mouse_x;
     new_y = y - mouse_y;
 
@@ -212,29 +239,21 @@ void on_motion(int x, int y) {
     /* Izracunava se nova matrica rotacije */
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
-    glLoadIdentity();
+        glLoadIdentity();
 
-    if (new_x < 0) {
-        glRotatef(-180 * (float) new_x / window_w, 0, -1, 0);
-    } else if (new_x > 0) {
-        glRotatef(180 * (float) new_x / window_w, 0, 1, 0);
-    } else if (new_y < 0) {
-        glRotatef(180 * (float) new_y / window_h, 1, 0, 0);
-    } else if (new_y > 0) {
-        glRotatef(-180 * (float) new_y / window_h, -1, 0, 0);
-    }
+        if (new_x < 0) {
+            glRotatef(-180 * (float) new_x / window_w, 0, -1, 0);
+        } else if (new_x > 0) {
+            glRotatef(180 * (float) new_x / window_w, 0, 1, 0);
+        } else if (new_y < 0) {
+            glRotatef(180 * (float) new_y / window_h, 1, 0, 0);
+        } else if (new_y > 0) {
+            glRotatef(-180 * (float) new_y / window_h, -1, 0, 0);
+        }
 
-    glMultMatrixf(rotation_matrix);
-
-    glGetFloatv(GL_MODELVIEW_MATRIX, rotation_matrix);
+        glMultMatrixf(rotation_matrix);
+        glGetFloatv(GL_MODELVIEW_MATRIX, rotation_matrix);
     glPopMatrix();
 
     glutPostRedisplay();
-}
-
-void on_passive_motion(int x, int y) {
-    if(picked)
-    {
-
-    }
 }

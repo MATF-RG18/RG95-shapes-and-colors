@@ -5,11 +5,15 @@
  * Implementacija osnovne drvene kutije u koju se ubacuju oblici.
  */
 
-#define SIZE 3
+#include <GL/glut.h>
+#include <GL/glu.h>
+#include <GL/gl.h>
+
+#define MAIN_CUBE_SIZE 3
 
 class MainCube {
 public:
-    MainCube(float size = SIZE)
+    MainCube(float size = MAIN_CUBE_SIZE)
     : _size(size)
     {}
 

@@ -1,9 +1,15 @@
 #ifndef __SHAPES_HPP__
 #define __SHAPES_HPP__ 1
 
-#include <ostream>
 #include <GL/glut.h>
 #include <GL/glu.h>
+#include <GL/gl.h>
+#include <iostream>
+#include <map>
+#include "mainCube.hpp"
+
+#define NUM_OF_OBJECTS 20
+#define MAX_COLORS 20
 
 struct Color {
     float color_r;
@@ -20,28 +26,31 @@ struct Coordinates {
     float center_z;
 };
 
-#define NUM_OF_OBJECTS 10
-#define MAX_COLORS 10
+bool operator==(const Coordinates& left, const Coordinates& right);
+bool operator<(const Coordinates& left, const Coordinates& right);
 
 /* Nizovi komponenti boja */
-const float r_values[MAX_COLORS] = {1, 0, 0, 1, 1, 0, 0.6, 0, 0.6, 0};
-const float g_values[MAX_COLORS] = {0, 0, 1, 0, 0.5, 1, 0, 0.6, 0.25, 0};
-const float b_values[MAX_COLORS] = {0, 1, 0, 0.6, 0, 1, 0.4, 0.3, 1, 0.6};
+const float r_values[MAX_COLORS] = {1, 0, 0, 0, 1, 1, 0, 0, 1, 0.7, 0.4, 1, 0.4, 0.7, 1, 0.5, 0.5, 1, 0.3, 1};
+const float g_values[MAX_COLORS] = {0, 0, 1, 1, 1, 0, 1, 0.4, 0.5, 0.4, 0.7, 0.6, 0.2, 0.7, 0, 1, 0.5, 0.8, 0, 0.7};
+const float b_values[MAX_COLORS] = {0, 1, 0, 0.5, 0, 0.5, 1, 0, 0, 1, 1, 1, 0, 0.7, 1, 0.8, 0.5, 0, 0.5, 0.8};
 
 void draw_prism(float size, float height);
 void draw_cylinder(float height, float base, bool half);
+void get_coordinates();
 
 class Shape {
 public:
     Shape(Coordinates xyz, float size)
         : _xyz(xyz), _size(size)
     {
-        /*  Boja koja se dobija jedinstveno iz niza boja na osnovu vrednosti promenljive id */
-        _c.color_r = r_values[id%NUM_OF_OBJECTS];
-        _c.color_g = g_values[id%NUM_OF_OBJECTS];
-        _c.color_b = b_values[id%NUM_OF_OBJECTS];
+        _id = next_available_id;
 
-        id++;
+        /*  Boja koja se dobija jedinstveno iz niza boja na osnovu vrednosti promenljive id */
+        _c.color_r = r_values[_id%NUM_OF_OBJECTS];
+        _c.color_g = g_values[_id%NUM_OF_OBJECTS];
+        _c.color_b = b_values[_id%NUM_OF_OBJECTS];
+
+        next_available_id++;
 
         /* Inicijalizuje se sistem objekta na jedinicnu matricu */
         glMatrixMode(GL_MODELVIEW);
@@ -50,17 +59,16 @@ public:
     }
 
     Color _c;
+    float _system[16];
     virtual void draw() = 0;
-    virtual ~Shape() {
-    }
+    virtual void draw_on_main_cube(Color c) const = 0;
+    virtual ~Shape() = default;
 
 protected:
     Coordinates _xyz;
+    int _id;
     float _size;
-    float _system[16];
-
-private:
-    static unsigned int id;
+    static unsigned int next_available_id;
 };
 
 class Sphere : public Shape {
@@ -69,7 +77,8 @@ public:
     : Shape(xyz, size)
     {}
 
-    void draw();
+    void draw() override;
+    void draw_on_main_cube(Color c) const override;
 };
 
 class Cube : public Shape {
@@ -78,7 +87,8 @@ public:
     : Shape(xyz, size)
     {}
 
-    void draw();
+    void draw() override;
+    void draw_on_main_cube(Color c) const override;
 };
 
 class TriangularPrism: public Shape {
@@ -89,7 +99,8 @@ public:
         _height = size;
     }
 
-    void draw();
+    void draw() override;
+    void draw_on_main_cube(Color c) const;
 private:
     float _height;
 };
@@ -102,7 +113,8 @@ public:
         _height = base * 2;
     }
 
-    void draw();
+    void draw() override;
+    void draw_on_main_cube(Color c) const;
 private:
     float _height;
 };
@@ -113,7 +125,8 @@ public:
     : Shape(xyz, size)
     {}
 
-    void draw();
+    void draw() override;
+    void draw_on_main_cube(Color c) const;
 };
 
 class Flower : public Shape {
@@ -122,7 +135,8 @@ public:
     : Shape(xyz, size)
     {}
 
-    void draw();
+    void draw() override;
+    void draw_on_main_cube(Color c) const;
 };
 
 class Heart : public Shape {
@@ -133,7 +147,8 @@ public:
         _height = size / 2;
     }
 
-    void draw();
+    void draw() override;
+    void draw_on_main_cube(Color c) const;
 private:
     float _height;
 };
