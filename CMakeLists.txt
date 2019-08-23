@@ -7,4 +7,4 @@ link_libraries(GL)
 link_libraries(GLU)
 link_libraries(glut)
 
-add_executable(RG95-shapes-and-colors src/main.cpp src/shapes.cpp src/shapes.hpp src/mainCube.hpp src/mainCube.cpp src/firstScene.cpp src/firstScene.hpp src/texture.cpp src/texture.hpp )
+add_executable(RG95-shapes-and-colors src/main.cpp shapes/shapes.cpp shapes/shapes.hpp src/mainCube.hpp src/mainCube.cpp src/firstScene.cpp src/firstScene.hpp src/texture.cpp src/texture.hpp shapes/sphere.cpp shapes/cube.cpp shapes/triangularPrism.cpp shapes/cylinder.cpp shapes/star.cpp shapes/flower.cpp shapes/heart.cpp)

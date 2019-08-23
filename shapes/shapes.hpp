@@ -6,11 +6,12 @@
 #include <GL/gl.h>
 #include <iostream>
 #include <map>
-#include "mainCube.hpp"
+#include <cmath>
+#include "../src/mainCube.hpp"
 
 #define NUM_OF_OBJECTS 20
 #define MAX_COLORS 20
-#define NUM_OF_VERTEXES 200
+#define NUM_OF_VERTEXES 300
 #define EPS 0.05
 
 struct Color {
@@ -23,9 +24,9 @@ bool operator==(const Color& left, const Color& right);
 bool operator<(const Color& left, const Color& right);
 
 struct Coordinates {
-    float center_x;
-    float center_y;
-    float center_z;
+    float x;
+    float y;
+    float z;
 };
 
 bool operator==(const Coordinates& left, const Coordinates& right);
@@ -36,8 +37,13 @@ const float r_values[MAX_COLORS] = {1, 0, 0, 0, 1, 1, 0, 0, 1, 0.7, 0.4, 1, 0.4,
 const float g_values[MAX_COLORS] = {0, 0, 1, 1, 1, 0, 1, 0.4, 0.5, 0.4, 0.7, 0.6, 0.2, 0.7, 0, 1, 0.5, 0.8, 0, 0.7};
 const float b_values[MAX_COLORS] = {0, 1, 0, 0.5, 0, 0.5, 1, 0, 0, 1, 1, 1, 0, 0.7, 1, 0.8, 0.5, 0, 0.5, 0.8};
 
+Coordinates cross_product(Coordinates a, Coordinates b);
+Coordinates calculate_normal(Coordinates x, Coordinates y);
 void draw_prism(float size, float height);
 void draw_cylinder(float height, float base, bool half);
+
+extern std::map<int, Coordinates> places_on_main_cube; // Mapira se id u poziciju oblika na glavnoj kocki
+extern float cylinder_height;
 
 class Shape {
 public:

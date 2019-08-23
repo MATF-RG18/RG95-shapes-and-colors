@@ -6,7 +6,7 @@
 #include <cmath>
 #include <memory>
 #include "mainCube.hpp"
-#include "shapes.hpp"
+#include "../shapes/shapes.hpp"
 
 class FirstScene {
 public:

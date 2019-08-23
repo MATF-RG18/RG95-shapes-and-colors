@@ -5,7 +5,7 @@
 #include <cmath>
 #include <map>
 #include "mainCube.hpp"
-#include "shapes.hpp"
+#include "../shapes/shapes.hpp"
 #include "firstScene.hpp"
 #include "texture.hpp"
 
@@ -23,6 +23,7 @@ extern std::map<Color, int> object_colors_on_cube; // Mapira se boja u indeks u 
 int selected_object = -1; // Indeks objekta koji je selektovan
 bool waiting_for_another_click = false; // Koristi se za registrovanje dvoklika
 GLuint names[2]; // Identifikatori tekstura
+float scale = 1; // Promenljiva koja se koristi za zumiranje
 
 void on_display();
 void initialize();
@@ -62,6 +63,8 @@ void initialize() {
     /* Omogućava se provera dubine i normalizacija vektora normale */
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_NORMALIZE);
+
+    glShadeModel(GL_SMOOTH);
 
     /* Vrsi se inicijalizacija matrice rotacije i matrice selekcije na jedinicnu matricu */
     glMatrixMode(GL_MODELVIEW);
@@ -110,10 +113,33 @@ void on_keyboard(unsigned char key, int x, int y) {
             glGetFloatv(GL_MODELVIEW_MATRIX, rotation_matrix);
             glutPostRedisplay(); // Forsira se ponovno iscrtavanje
             break;
+        case 'w':
+        case 'W':
+            scale += 0.2;
+            scale = scale > 2.4? 2.4 : scale;
+            glutPostRedisplay();
+            break;
+        case 's':
+        case 'S':
+            scale -= 0.2;
+            scale = scale < 0.4? 0.4 : scale;
+            glutPostRedisplay();
+            break;
     }
 }
 
 void on_display() {
+    /* Podešava se svetlo */
+
+    /* Boje svetla */
+    GLfloat light_position[] = { -2, 5, 0, 0 };
+    GLfloat light_ambient[] = { 0.5, 0.5, 0.5, 0.1 };
+    GLfloat light_diffuse[] = { 0.8, 0.8, 0.8, 1 };
+    GLfloat light_specular[] = { 0.6, 0.6, 0.6, 1 };
+
+    /* Koeficijenti refleksije svetla */
+    GLfloat shininess = 50;
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     /* Podešava se tačka pogleda */
@@ -123,6 +149,20 @@ void on_display() {
 
     /* Primenjuje se matrica rotacije tako što se množi sa matricom za pogled i transformaciju */
     glMultMatrixf(rotation_matrix);
+    glScalef(scale, scale, scale);
+
+    glEnable(GL_COLOR_MATERIAL);
+    glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+
+    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+    glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
+
+    glMaterialf(GL_FRONT, GL_SHININESS, shininess);
 
     /* Iscrtava se osnovna kocka */
     glBindTexture(GL_TEXTURE_2D, names[0]);
@@ -177,7 +217,6 @@ void on_timer(int value)
 }
 
 void on_mouse(int button, int state, int x, int y) {
-    glDisable(GL_TEXTURE_2D);
 
     if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
         /* U slučaju da je pritisnut levi taster miša pamti se pozicija*/
