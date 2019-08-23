@@ -21,7 +21,7 @@ void Cube::draw_on_main_cube(Color c) const
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         /* Postoje tri grupe strana na osnovu toga koje ose se koriste za
          * 2d iscrtavanje oblika na glavnoj kocki */
-        switch(_id%3)
+        switch(_id % 3)
         {
             /* Koriste se x i y osa za iscrtavnje */
             case 0:

@@ -1,21 +1,22 @@
 #include "firstScene.hpp"
 
-std::shared_ptr<Shape> objects[NUM_OF_OBJECTS];
-std::map<int, Coordinates> places_on_main_cube;
-std::map<int, bool> matched_objects;
+std::shared_ptr<Shape> objects[NUM_OF_OBJECTS]; // Niz objekata
+std::map<int, Coordinates> places_on_main_cube; // Mapa koja preslikava identifikator u mesto na glavnoj kocki
+std::map<int, bool> matched_objects; // Mapa koja preslikava identifikator u informaciju da li su objekti upareni
 
-float get_random_between_0_and_1();
-void get_coordinates();
+float get_random_between_0_and_1(); // Pomoćna funkcija koja vraća slučajan broj između 0 i 1
+void get_places_on_main_cube(); // Pomoćna funkcija koja inicijalizuje mapu za mesta na kocki
 
 void FirstScene::initialize_objects() const
 {
-    get_coordinates(); // Inicijalizuju se koordinate na kocki
+    get_places_on_main_cube(); // Inicijalizuju se koordinate na kocki
     srand(time(nullptr));
 
-    for (int i = 0; i < NUM_OF_OBJECTS; i++) {
-        matched_objects.insert(std::pair<int, bool>(i, false));
+    for (int i = 0; i < NUM_OF_OBJECTS; i++)
+    {
+        matched_objects.insert(std::pair<int, bool>(i, false)); // Inicijalizuje se mapa uparenih oblika
 
-        float size; // Uzima se slucajna velicia
+        float size; // Uzima se slučajna veličina
 
         /* Parametrizuju se krugovi na kojima se nalaze objekti, kako bi se ravnomerno rasporedili */
         float t = (i % 10) * (2 * M_PI) / 10;
@@ -38,7 +39,8 @@ void FirstScene::initialize_objects() const
 
         /* Bira se nasumična vrsta i veličina objekta */
         int k = ((int)floor((get_random_between_0_and_1()) * 7) + i) % 7;
-        switch (k) {
+        switch (k)
+        {
             case 0:
                 size = get_random_between_0_and_1() * ((float)MAIN_CUBE_SIZE/4 - 0.8) + 0.5;
                 objects[i] = std::make_shared<Sphere>(xyz, size);
@@ -79,7 +81,7 @@ float get_random_between_0_and_1()
     return (float) rand() / (RAND_MAX);
 }
 
-void get_coordinates()
+void get_places_on_main_cube()
 {
     Coordinates xyz = {-(float)MAIN_CUBE_SIZE/4, (float)MAIN_CUBE_SIZE/4, (float)MAIN_CUBE_SIZE/2 + 0.01};
     places_on_main_cube.insert(std::pair<int, Coordinates>(0, xyz));

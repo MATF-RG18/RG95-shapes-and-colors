@@ -20,9 +20,6 @@ struct Color {
     float color_b;
 };
 
-bool operator==(const Color& left, const Color& right);
-bool operator<(const Color& left, const Color& right);
-
 struct Coordinates {
     float x;
     float y;
@@ -37,10 +34,10 @@ const float r_values[MAX_COLORS] = {255, 0, 0, 240, 210, 128, 255, 0, 128, 245, 
 const float g_values[MAX_COLORS] = {0, 255, 0, 50, 245, 0, 225, 0, 128, 130, 240, 25, 130, 190, 110, 180, 30, 140, 78, 200};
 const float b_values[MAX_COLORS] = {0, 0, 255, 230, 60, 0, 25, 128, 128, 48, 240, 75, 200, 190, 40, 75, 180, 0, 92, 120};
 
-Coordinates cross_product(Coordinates a, Coordinates b);
-Coordinates calculate_normal(Coordinates a, Coordinates b, Coordinates c);
-void draw_prism(float size, float height);
-void draw_cylinder(float height, float base, bool half);
+Coordinates cross_product(Coordinates a, Coordinates b); // Pomoćna funkcija za računanje vektorskog proizvoda
+Coordinates calculate_normal(Coordinates a, Coordinates b, Coordinates c); // Pomoćna funkcija za računanje normale
+void draw_prism(float size, float height); // Pomoćna funkcija za crtanje trostrane prizme
+void draw_cylinder(float height, float base, bool half); // Pomoćna funkcija za crtanje valjka
 
 extern std::map<int, Coordinates> places_on_main_cube; // Mapira se id u poziciju oblika na glavnoj kocki
 extern float cylinder_height;
@@ -48,7 +45,7 @@ extern float cylinder_height;
 class Shape {
 public:
     Shape(Coordinates xyz, float size)
-        : _xyz(xyz), _size(size)
+    : _xyz(xyz), _size(size)
     {
         _id = next_available_id;
         next_available_id++;
@@ -64,18 +61,17 @@ public:
         glGetFloatv(GL_MODELVIEW_MATRIX, _system);
     }
 
-    Color _c; // Boja kojom se boji element
     Coordinates _xyz; // Pozicija objekta na zamišljenom krugu
-    float _system[16]; // Matrica koja čuva sistem objekta
+    int getId() const;
+    const Color &getC() const;
     virtual void draw(Color c) = 0; // Metod koji iscrtava objekat
     virtual void draw_on_main_cube(Color c) const = 0; // Metod koji iscrtava odgovarajući oblik na kocki
     virtual ~Shape() = default;
-
-    int getId() const;
-
 protected:
     int _id; // identifikator objekta
     float _size; // Veličina objekta
+    float _system[16]; // Matrica koja čuva sistem objekta
+    Color _c; // Boja kojom se boji element
     static unsigned int next_available_id; // Brojač napravljenih objekata
 };
 

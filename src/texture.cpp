@@ -55,7 +55,8 @@ void Texture::read(const char *filename)
     /* Pošto se koriste samo R, G i B komponente, alocira se niz dužine 24 */
     if (bih.bitcount == 24)
         _pixels = new char[3 * bih.width * bih.height ];
-    else {
+    else
+    {
         std::cerr << "read(): Only images with 24 bits per pixel are supported" << std::endl;
         exit(EXIT_FAILURE);
     }

@@ -264,7 +264,7 @@ void on_display() {
     /* Podešava se svetlo */
 
     /* Boje svetla */
-    GLfloat light_position[] = { -2, 5, 0, 0 };
+    GLfloat light_position[] = { 0, 5, 0, 0 };
     GLfloat light_ambient[] = { 0.5, 0.5, 0.5, 0.1 };
     GLfloat light_diffuse[] = { 0.8, 0.8, 0.8, 1 };
     GLfloat light_specular[] = { 0.6, 0.6, 0.6, 1 };
@@ -337,19 +337,19 @@ void on_display() {
                 Coordinates object_coordinates = objects[i]->_xyz;
                 object_coordinates.y = delta_y;
                 objects[i]->_xyz = object_coordinates;
-                objects[i]->draw(objects[i]->_c);
+                objects[i]->draw(objects[i]->getC());
 
                 glPushMatrix();
                 /* Na osnovu id-ja u mapi se pronalazi odgovarajuća pozicija na kocki */
                 Coordinates xyz = places_on_main_cube.find(objects[i]->getId())->second;
                 glTranslatef(xyz.x, xyz.y, xyz.z);
 
-                objects[i]->draw_on_main_cube(objects[i]->_c);
+                objects[i]->draw_on_main_cube(objects[i]->getC());
                 glPopMatrix();
             }
             else if(i == current_shape_on_cube && animation_ongoing1)
             {
-                objects[i]->draw(objects[i]->_c);
+                objects[i]->draw(objects[i]->getC());
 
                 glPushMatrix();
                 /* Na osnovu id-ja u mapi se pronalazi odgovarajuća pozicija na kocki */
@@ -370,19 +370,19 @@ void on_display() {
                     default: std::cerr << "This should not happen" << std::endl;
                 }
 
-                objects[i]->draw_on_main_cube(objects[i]->_c);
+                objects[i]->draw_on_main_cube(objects[i]->getC());
                 glPopMatrix();
             }
             else
             {
-                objects[i]->draw(objects[i]->_c);
+                objects[i]->draw(objects[i]->getC());
 
                 glPushMatrix();
                 /* Na osnovu id-ja u mapi se pronalazi odgovarajuća pozicija na kocki */
                 Coordinates xyz = places_on_main_cube.find(objects[i]->getId())->second;
                 glTranslatef(xyz.x, xyz.y, xyz.z);
 
-                objects[i]->draw_on_main_cube(objects[i]->_c);
+                objects[i]->draw_on_main_cube(objects[i]->getC());
                 glPopMatrix();
             }
 

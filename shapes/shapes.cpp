@@ -9,10 +9,14 @@ int Shape::getId() const {
     return _id;
 }
 
+const Color &Shape::getC() const {
+    return _c;
+}
+
 Coordinates cross_product(Coordinates a, Coordinates b)
 {
-    Coordinates c = {a.y*b.z - b.y*a.z, - a.x*b.z + b.x*a.z,
-                     a.x*b.y - b.x*a.y};
+    Coordinates c = {a.y*b.z - a.z*b.y, a.z*b.x - a.x*b.z,
+                     a.x*b.y - a.y*b.x};
 
     return c;
 }
@@ -40,7 +44,7 @@ void draw_prism(float size, float height)
         Coordinates a = {size/2, -size*(float)sqrt(3)/4, -height/2};
         Coordinates b = {0, size*(float)sqrt(3)/4, -height/2};
         Coordinates c = {0, size*(float)sqrt(3)/4, height/2};
-        Coordinates result = calculate_normal(a, b, c);
+        Coordinates result = calculate_normal(c, b, a);
         glNormal3f(result.x, result.y, result.z);
 
         glVertex3f(size/2, -size*sqrt(3)/4, -height/2);
@@ -136,26 +140,6 @@ void draw_cylinder(float height, float base, bool half)
     glPopMatrix();
 }
 
-bool operator==(const Color& left, const Color& right)
-{
-    float d1 = std::fabs(left.color_r - right.color_r);
-    float d2 = std::fabs(left.color_g - right.color_g);
-    float d3 = std::fabs(left.color_b - right.color_b);
-
-    return d1 <= EPS && d2 <= EPS && d3 <= EPS;
-}
-
-bool operator<(const Color& left, const Color& right)
-{
-    if (left.color_r == right.color_r && left.color_g == right.color_g) {
-        return left.color_b < right.color_b;
-    } else if (left.color_r == right.color_r) {
-        return left.color_g < right.color_g;
-    } else {
-        return left.color_r < right.color_r;
-    }
-}
-
 bool operator==(const Coordinates& left, const Coordinates& right)
 {
     float d1 = std::fabs(left.x- right.x);
@@ -167,11 +151,16 @@ bool operator==(const Coordinates& left, const Coordinates& right)
 
 bool operator<(const Coordinates& left, const Coordinates& right)
 {
-    if (left.x == right.x && left.y == right.y) {
+    if (left.x == right.x && left.y == right.y)
+    {
         return left.z < right.z;
-    } else if (left.x == right.x) {
+    }
+    else if (left.x == right.x)
+    {
         return left.y < right.y;
-    } else {
+    }
+    else
+    {
         return left.x < right.x;
     }
 }

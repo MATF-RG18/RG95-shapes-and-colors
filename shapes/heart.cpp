@@ -22,7 +22,7 @@ void Heart::draw(Color c)
 
         glPushMatrix();
             glRotatef(90, 1, 0, 0);
-            draw_prism(_size, cylinder_height);
+            draw_prism(_size, _height);
         glPopMatrix();
 
         glGetFloatv(GL_MODELVIEW_MATRIX, _system); // Pamti se sistem objekta
@@ -37,7 +37,7 @@ void Heart::draw_on_main_cube(Color c) const
     glPushMatrix();
         /* Postoje tri grupe strana na osnovu toga koje ose se koriste za
              * 2d iscrtavanje oblika na glavnoj kocki */
-        switch(_id%3)
+        switch(_id % 3)
         {
             /* Koriste se x i y osa za iscrtavnje */
             case 0:
