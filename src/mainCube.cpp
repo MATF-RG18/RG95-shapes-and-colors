@@ -6,9 +6,6 @@ void MainCube::draw() const
         /* Prednja strana kocke */
         glNormal3f(0, 0, 1);
 
-        glTexCoord2f(0, 1);
-        glVertex3f(-(float)MAIN_CUBE_SIZE/2, (float)MAIN_CUBE_SIZE/2, (float)MAIN_CUBE_SIZE/2);
-
         glTexCoord2f(0, 0);
         glVertex3f(-(float)MAIN_CUBE_SIZE/2, -(float)MAIN_CUBE_SIZE/2, (float)MAIN_CUBE_SIZE/2);
 
@@ -17,6 +14,9 @@ void MainCube::draw() const
 
         glTexCoord2f(1, 1);
         glVertex3f((float)MAIN_CUBE_SIZE/2, (float)MAIN_CUBE_SIZE/2, (float)MAIN_CUBE_SIZE/2);
+
+        glTexCoord2f(0, 1);
+        glVertex3f(-(float)MAIN_CUBE_SIZE/2, (float)MAIN_CUBE_SIZE/2, (float)MAIN_CUBE_SIZE/2);
 
         /* Bocna desna strana kocke */
         glNormal3f(1, 0, 0);

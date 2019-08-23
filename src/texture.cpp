@@ -1,14 +1,17 @@
 #include "texture.hpp"
 
-int Texture::getWidth() const {
+int Texture::getWidth() const
+{
     return _width;
 }
 
-int Texture::getHeight() const {
+int Texture::getHeight() const
+{
     return _height;
 }
 
-char *Texture::getPixels() const {
+char *Texture::getPixels() const
+{
     return _pixels;
 }
 
@@ -20,7 +23,7 @@ void Texture::read(const char *filename)
     unsigned char r, g, b;
 
     free(_pixels);
-    _pixels = NULL;
+    _pixels = nullptr;
 
     /* Otvara se fajl sa teksturom */
     assert((file = fopen(filename, "rb")) != NULL);
@@ -45,28 +48,22 @@ void Texture::read(const char *filename)
     fread(&bih.colorsused, 4, 1, file);
     fread(&bih.colorsimportant, 4, 1, file);
 
+    /* Od podataka iz drugog zaglavlja koriste se samo širina i visina */
     _width = bih.width;
     _height = bih.height;
 
-    /*
-     * U zavisnosti od toga koliko bitova informacija se cita po pikselu
-     * (da li samo R, G i B komponenta ili R, G, B i A), alociramo niz
-     * odgovarajuce duzine.
-     */
-
     /* Pošto se koriste samo R, G i B komponente, alocira se niz dužine 24 */
     if (bih.bitcount == 24)
-        _pixels = (char *)malloc(3 * bih.width * bih.height * sizeof(char));
+        _pixels = new char[3 * bih.width * bih.height ];
     else {
         std::cerr << "read(): Only images with 24 bits per pixel are supported" << std::endl;
         exit(EXIT_FAILURE);
     }
 
-    assert(_pixels != NULL);
+    assert(_pixels != nullptr);
 
     /* Učitavaju se podaci o pikselima i smeštaju u alocirani niz.
-     * Pretpostavlja se da učitana tri bajta = 24 bita predstavljaju R, G i B komponentu boje */
-
+     * Pretpostavlja se da učitana 3 bajta = 24 bita predstavljaju R, G i B komponentu boje */
     for (int i = 0; i < bih.width * bih.height; i++)
     {
         /* U bmp formatu boje se čitaju u B, G, R redosledu */

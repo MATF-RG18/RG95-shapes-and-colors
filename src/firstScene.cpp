@@ -1,19 +1,20 @@
 #include "firstScene.hpp"
 
 std::shared_ptr<Shape> objects[NUM_OF_OBJECTS];
-std::map<Color, int> object_colors;
-std::map<Color, int> object_colors_on_cube;
 std::map<int, Coordinates> places_on_main_cube;
+std::map<int, bool> matched_objects;
 
 float get_random_between_0_and_1();
 void get_coordinates();
 
-void FirstScene::draw() const
+void FirstScene::initialize_objects() const
 {
     get_coordinates(); // Inicijalizuju se koordinate na kocki
     srand(time(nullptr));
 
     for (int i = 0; i < NUM_OF_OBJECTS; i++) {
+        matched_objects.insert(std::pair<int, bool>(i, false));
+
         float size; // Uzima se slucajna velicia
 
         /* Parametrizuju se krugovi na kojima se nalaze objekti, kako bi se ravnomerno rasporedili */
@@ -70,23 +71,6 @@ void FirstScene::draw() const
                 size = get_random_between_0_and_1() * ((float)MAIN_CUBE_SIZE/4 - 0.5) + 0.5;
                 objects[i] = std::make_shared<Sphere>(xyz, size);
         }
-
-        object_colors.insert(std::pair<Color, int>(objects[i]->_c, i)); // Dodaje se boja objekata u niz
-
-        /* Oduzimanje male vrednosti se vrsi kako bi sve sto je iscrtano na sceni imalo jedinstvenu boju,
-         * što je potrebno za selekciju */
-        float r = objects[i]->_c.color_r - 2*EPS;
-        r = r < 0? 0 : r;
-        float g = objects[i]->_c.color_g - 2*EPS;
-        g = g < 0? 0 : g;
-        float b = objects[i]->_c.color_b - 2*EPS;
-        b = b < 0? 0 : b;
-
-        Color c = {r, g, b};
-
-        object_colors_on_cube.insert(std::pair<Color, int>(c, i)); // Dodaje se boja na kocki u niz, što je potrebno zbog selekcije
-        objects[i]->draw(); // Iscrtavaju se objekti
-        objects[i]->draw_on_main_cube(c); // Iscrtavaju se odgovarajući objekti na kocki
     }
 }
 

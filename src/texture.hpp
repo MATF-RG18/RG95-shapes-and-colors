@@ -4,10 +4,7 @@
 /* Klasa koja se koristi sa učitavanje tekstura. Ideja iz kodova sa časa. */
 
 #include <vector>
-#include <string>
 #include <cassert>
-#include <cstdio>
-#include <cstdlib>
 #include <iostream>
 
 /* Svaka slika u bmp formatu pocinje sa dva zaglavlja koja su ilustrovana sledećim dvema klasama */
@@ -40,20 +37,20 @@ public:
     unsigned int colorsimportant;
 };
 
-/* Klasa koja sluzi sa smeštanje podataka o slici */
-
+/* Klasa koja služi sa smeštanje podataka o slici */
 class Texture {
 public:
     Texture(int width = 0, int height = 0)
     : _width(width), _height(height)
     {
-        /* U slučaju greške prekida se program. */
+        /* U slučaju da su prosleđena visina ili širina manje od 0 prekida se program. */
         assert(width >= 0 && height >= 0);
 
+        /* Alocira se potrebna memorija za smeštanje informacija o svakom pikselu */
         if (width == 0 || height == 0)
-            _pixels = NULL;
+            _pixels = nullptr;
         else {
-            _pixels = (char *)malloc(3 * width * height * sizeof(char));
+            _pixels = new char[3 * width * height];
             assert(_pixels != NULL);
         }
     }
@@ -62,7 +59,7 @@ public:
     void free_image();
     int getWidth() const;
     int getHeight() const;
-    char *getPixels() const;
+    char* getPixels() const;
 private:
     int _width;
     int _height;

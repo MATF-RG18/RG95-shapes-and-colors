@@ -9,8 +9,11 @@
 #include "firstScene.hpp"
 #include "texture.hpp"
 
-#define TIMER_ID 0
 #define FILENAME0 "images/tekstura_kutije.bmp"
+#define TIMER0 0
+#define TIMER1 1
+#define TIMER_INTERVAL0 50
+#define TIMER_INTERVAL1 100
 
 int window_w, window_h; // Pri promeni pamti se širina i visina prozora
 int mouse_x = 0, mouse_y = 0; // Pri promeni pamti se pozicija miša
@@ -18,12 +21,18 @@ float rotation_matrix[16];
 float selection_matrix[16];
 bool first_draw = true; // Vrednost koja oznacava da li se vrsi prvi pozi funkcije display ili ne
 extern std::shared_ptr<Shape> objects[NUM_OF_OBJECTS]; // Niz objekata na sceni
-extern std::map<Color, int> object_colors; // Mapira se boja u indeks u nizu objekata. Koristi se za selekciju.
-extern std::map<Color, int> object_colors_on_cube; // Mapira se boja u indeks u nizu objekata za objekte na glavnoj kocki. Koristi se za selekciju.
-int selected_object = -1; // Indeks objekta koji je selektovan
-bool waiting_for_another_click = false; // Koristi se za registrovanje dvoklika
 GLuint names[2]; // Identifikatori tekstura
 float scale = 1; // Promenljiva koja se koristi za zumiranje
+int current_object = 0; // Indeks trenutno selektovanog objekta
+int current_shape_on_cube = 10;
+bool animation_ongoing0 = false;
+float delta = 0.1;
+float delta_y = 0;
+bool animation_ongoing1 = false;
+float angle = 30;
+float rotation = 0;
+bool matched = false;
+extern std::map<int, bool> matched_objects;
 
 void on_display();
 void initialize();
@@ -31,7 +40,9 @@ void on_keyboard(unsigned char key, int x, int y);
 void on_reshape(int width, int height);
 void on_mouse(int button, int s, int x, int y);
 void on_motion(int x, int y); // Pomeraj misa dok je dugme selektovano
-void on_timer(int value); // Tajmer za registrovanje dvoklika
+void on_special(int key, int x, int y); // Registruju se pritisci na strelice na tastaturi
+void on_timer0(int value);
+void on_timer1(int value);
 
 extern std::map<int, Coordinates> places_on_main_cube;
 
@@ -51,6 +62,7 @@ int main(int argc, char **argv) {
     glutReshapeFunc(on_reshape);
     glutMouseFunc(on_mouse);
     glutMotionFunc(on_motion);
+    glutSpecialFunc(on_special);
 
     glutMainLoop();
 
@@ -87,9 +99,9 @@ void initialize() {
     glGenTextures(2, names);
 
     glBindTexture(GL_TEXTURE_2D, names[0]);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
                  image.getWidth(), image.getHeight(), 0,
@@ -113,19 +125,139 @@ void on_keyboard(unsigned char key, int x, int y) {
             glGetFloatv(GL_MODELVIEW_MATRIX, rotation_matrix);
             glutPostRedisplay(); // Forsira se ponovno iscrtavanje
             break;
-        case 'w':
-        case 'W':
+        case 32:
+            if(animation_ongoing0)
+            {
+                animation_ongoing0 = false;
+                delta_y = 0;
+                objects[current_object]->_xyz.y = 0;
+                glutPostRedisplay();
+                animation_ongoing1 = true;
+                glutTimerFunc(TIMER_INTERVAL0, on_timer1, TIMER1);
+            }
+            else
+            {
+                if(current_shape_on_cube == current_object)
+                {
+                    matched = true;
+                    glutPostRedisplay();
+                }
+
+                animation_ongoing1 = false;
+                rotation = 0;
+                animation_ongoing0 = true;
+                current_shape_on_cube = (current_shape_on_cube + 10) % 20;
+                glutTimerFunc(TIMER_INTERVAL1, on_timer0, TIMER0);
+            }
+            break;
+    }
+}
+
+void on_special(int key, int x, int y)
+{
+    switch(key)
+    {
+        case GLUT_KEY_RIGHT:
+            if(animation_ongoing0)
+            {
+                objects[current_object]->_xyz.y = 0;
+                current_object++;
+                if(current_object >= NUM_OF_OBJECTS)
+                    current_object = 0;
+
+                while(matched_objects[current_object])
+                {
+                    current_object++;
+                    if(current_object >= NUM_OF_OBJECTS)
+                        current_object = 0;
+                }
+            }
+            else if(animation_ongoing1)
+            {
+                rotation = 0;
+                current_shape_on_cube++;
+                if(current_shape_on_cube >= NUM_OF_OBJECTS)
+                    current_shape_on_cube = 0;
+
+                while(matched_objects[current_shape_on_cube])
+                {
+                    current_shape_on_cube++;
+                    if(current_shape_on_cube >= NUM_OF_OBJECTS)
+                        current_shape_on_cube = 0;
+                }
+            }
+            break;
+        case GLUT_KEY_LEFT:
+            if(animation_ongoing0)
+            {
+                objects[current_object]->_xyz.y = 0;
+                current_object--;
+                if(current_object <= 0)
+                    current_object = NUM_OF_OBJECTS-1;
+
+                while(matched_objects[current_object])
+                {
+                    current_object--;
+                    if(current_object <= 0)
+                        current_object = NUM_OF_OBJECTS-1;
+                }
+            }
+            else if(animation_ongoing1)
+            {
+                rotation = 0;
+                current_shape_on_cube--;
+                if(current_shape_on_cube <= 0)
+                    current_shape_on_cube = NUM_OF_OBJECTS-1;
+
+                while(matched_objects[current_shape_on_cube])
+                {
+                    current_shape_on_cube--;
+                    if(current_shape_on_cube <= 0)
+                        current_shape_on_cube = NUM_OF_OBJECTS-1;
+                }
+            }
+            break;
+        case GLUT_KEY_UP:
             scale += 0.2;
             scale = scale > 2.4? 2.4 : scale;
             glutPostRedisplay();
             break;
-        case 's':
-        case 'S':
+        case GLUT_KEY_DOWN:
             scale -= 0.2;
             scale = scale < 0.4? 0.4 : scale;
             glutPostRedisplay();
             break;
     }
+}
+
+void on_timer0(int value)
+{
+    if(value != TIMER0)
+        return;
+
+    delta_y += delta;
+    if(delta_y >= 1 || delta_y <= -1)
+        delta *= -1;
+
+    glutPostRedisplay();
+
+    if(animation_ongoing0)
+        glutTimerFunc(TIMER_INTERVAL0, on_timer0, TIMER0);
+}
+
+void on_timer1(int value)
+{
+    if(value != TIMER1)
+        return;
+
+    rotation += angle;
+    if(rotation == 360)
+        rotation = 0;
+
+    glutPostRedisplay();
+
+    if(animation_ongoing1)
+        glutTimerFunc(TIMER_INTERVAL1, on_timer1, TIMER1);
 }
 
 void on_display() {
@@ -165,6 +297,7 @@ void on_display() {
     glMaterialf(GL_FRONT, GL_SHININESS, shininess);
 
     /* Iscrtava se osnovna kocka */
+
     glBindTexture(GL_TEXTURE_2D, names[0]);
         MainCube m;
         m.draw();
@@ -174,20 +307,85 @@ void on_display() {
     {
         /* Prvi put se pravi niz objekata */
         FirstScene first = FirstScene::getInstance();
-        first.draw();
+        first.initialize_objects();
 
         first_draw = false;
-    } else {
-        for (auto& object : objects) {
-            object->draw();
 
-            float r = object->_c.color_r - 0.01;
-            float g = object->_c.color_g - 0.01;
-            float b = object->_c.color_b - 0.01;
+        animation_ongoing0 = true;
+        glutTimerFunc(500, on_timer0, TIMER0);
+    }
 
-            Color c = {r, g, b};
+    for (int i = 0; i < NUM_OF_OBJECTS; i++)
+    {
+        if(matched_objects[i])
+            continue;
 
-            object->draw_on_main_cube(c);
+        if(i == current_object && matched)
+        {
+            objects[i] = nullptr;
+
+            matched_objects[i] = true;
+            current_object++;
+            matched = false;
+            continue;
+        }
+
+        if(objects[i] != nullptr)
+        {
+            if(i == current_object && animation_ongoing0)
+            {
+                Coordinates object_coordinates = objects[i]->_xyz;
+                object_coordinates.y = delta_y;
+                objects[i]->_xyz = object_coordinates;
+                objects[i]->draw(objects[i]->_c);
+
+                glPushMatrix();
+                /* Na osnovu id-ja u mapi se pronalazi odgovarajuća pozicija na kocki */
+                Coordinates xyz = places_on_main_cube.find(objects[i]->getId())->second;
+                glTranslatef(xyz.x, xyz.y, xyz.z);
+
+                objects[i]->draw_on_main_cube(objects[i]->_c);
+                glPopMatrix();
+            }
+            else if(i == current_shape_on_cube && animation_ongoing1)
+            {
+                objects[i]->draw(objects[i]->_c);
+
+                glPushMatrix();
+                /* Na osnovu id-ja u mapi se pronalazi odgovarajuća pozicija na kocki */
+                Coordinates xyz = places_on_main_cube.find(objects[i]->getId())->second;
+                glTranslatef(xyz.x, xyz.y, xyz.z);
+
+                switch(objects[i]->getId() % 3)
+                {
+                    case 0:
+                        glRotatef(rotation, 0, 0, 1);
+                        break;
+                    case 1:
+                        glRotatef(rotation, 1, 0, 0);
+                        break;
+                    case 2:
+                        glRotatef(rotation, 0, 1, 0);
+                        break;
+                    default: std::cerr << "This should not happen" << std::endl;
+                }
+
+                objects[i]->draw_on_main_cube(objects[i]->_c);
+                glPopMatrix();
+            }
+            else
+            {
+                objects[i]->draw(objects[i]->_c);
+
+                glPushMatrix();
+                /* Na osnovu id-ja u mapi se pronalazi odgovarajuća pozicija na kocki */
+                Coordinates xyz = places_on_main_cube.find(objects[i]->getId())->second;
+                glTranslatef(xyz.x, xyz.y, xyz.z);
+
+                objects[i]->draw_on_main_cube(objects[i]->_c);
+                glPopMatrix();
+            }
+
         }
     }
 
@@ -208,94 +406,14 @@ void on_reshape(int width, int height) {
     glLoadIdentity();
 }
 
-void on_timer(int value)
+
+void on_mouse(int button, int state, int x, int y)
 {
-    if(value != TIMER_ID)
-        return;
-
-    waiting_for_another_click = false;
-}
-
-void on_mouse(int button, int state, int x, int y) {
-
-    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
+    {
         /* U slučaju da je pritisnut levi taster miša pamti se pozicija*/
         mouse_x = x;
         mouse_y = y;
-
-        /* Dvoklikom na ojbekte se oni selektuju*/
-        if(!waiting_for_another_click)
-        {
-            waiting_for_another_click = true;
-            glutTimerFunc(250, on_timer, TIMER_ID);
-            return;
-        }
-
-        if(waiting_for_another_click)
-        {
-            float pixel[3];
-            GLint viewport[4];
-            glGetIntegerv(GL_VIEWPORT, viewport);
-
-            /* Ako je nešto selektovano, proverava se samo da li je sledeći selektovani objekat na kocki;
-             * ako nije zna se da je greška u pitanju. Kada ništa nije selektovano promenljiva
-             * selected_object ima vrednost -1. */
-            if(selected_object != -1)
-            {
-                glReadPixels(x, viewport[3] - y, 1, 1, GL_RGB, GL_FLOAT, pixel);
-                Color p = {pixel[0], pixel[1], pixel[2]};
-                std::cout << "r(" << pixel[0] << " ," << pixel[1] << ", " << pixel[2] << ")" << std::endl;
-
-                int selected = -1;
-                auto it = object_colors_on_cube.cbegin();
-                while(it != object_colors_on_cube.cend())
-                {
-                    if (it->first == p)
-                    {
-                        selected = it->second;
-                        std::cout << selected_object << std::endl;
-                        break;
-                    }
-
-                    it++;
-                }
-
-                if(selected != -1) {
-                    std::cout << "Proveravam da li su upareni" << std::endl;
-                    selected_object = -1;
-                }
-                else {
-                    selected_object = -1;
-                    std::cout << selected_object << std::endl;
-                }
-
-                return;
-            }
-
-            glReadPixels(x, viewport[3] - y, 1, 1, GL_RGB, GL_FLOAT, pixel);
-            Color p = {pixel[0], pixel[1], pixel[2]};
-            std::cout << "r(" << pixel[0] << " ," << pixel[1] << ", " << pixel[2] << ")" << std::endl;
-            auto it = object_colors.cbegin();
-            while(it != object_colors.cend())
-            {
-                if(selected_object == -1)
-                {
-                    if (it->first == p) {
-                        selected_object = it->second;
-
-                        glMatrixMode(GL_MODELVIEW);
-                        glPushMatrix();
-                            glLoadMatrixf(objects[selected_object]->_system);
-                            glGetFloatv(GL_MODELVIEW_MATRIX, selection_matrix);
-                            std::cout << selected_object << std::endl;
-                        glPopMatrix();
-                        break;
-                    }
-                }
-
-                it++;
-            }
-        }
     }
 }
 

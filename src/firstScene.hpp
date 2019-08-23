@@ -17,7 +17,7 @@ public:
         return instance;
     }
 
-    void draw() const;
+    void initialize_objects() const;
 private:
     FirstScene() = default;
 };

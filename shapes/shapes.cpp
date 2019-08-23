@@ -5,6 +5,10 @@
 unsigned int Shape::next_available_id = 0;
 float cylinder_height = 0;
 
+int Shape::getId() const {
+    return _id;
+}
+
 Coordinates cross_product(Coordinates a, Coordinates b)
 {
     Coordinates c = {a.y*b.z - b.y*a.z, - a.x*b.z + b.x*a.z,
@@ -111,7 +115,6 @@ void draw_cylinder(float height, float base, bool half)
         /* Iscrtavaju se baze cilindra */
         for(i = 0; i <= cylinder_height; i += cylinder_height)
         {
-            std::cout << i << std::endl;
             glBegin(GL_TRIANGLE_FAN);
                 if(i == 0)
                     glNormal3f(0, -1, 0);

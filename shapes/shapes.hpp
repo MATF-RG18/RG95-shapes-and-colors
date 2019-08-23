@@ -33,12 +33,12 @@ bool operator==(const Coordinates& left, const Coordinates& right);
 bool operator<(const Coordinates& left, const Coordinates& right);
 
 /* Nizovi komponenti boja */
-const float r_values[MAX_COLORS] = {1, 0, 0, 0, 1, 1, 0, 0, 1, 0.7, 0.4, 1, 0.4, 0.7, 1, 0.5, 0.5, 1, 0.3, 1};
-const float g_values[MAX_COLORS] = {0, 0, 1, 1, 1, 0, 1, 0.4, 0.5, 0.4, 0.7, 0.6, 0.2, 0.7, 0, 1, 0.5, 0.8, 0, 0.7};
-const float b_values[MAX_COLORS] = {0, 1, 0, 0.5, 0, 0.5, 1, 0, 0, 1, 1, 1, 0, 0.7, 1, 0.8, 0.5, 0, 0.5, 0.8};
+const float r_values[MAX_COLORS] = {255, 0, 0, 240, 210, 128, 255, 0, 128, 245, 70, 230, 0, 250, 170, 60, 145, 255, 204, 80};
+const float g_values[MAX_COLORS] = {0, 255, 0, 50, 245, 0, 225, 0, 128, 130, 240, 25, 130, 190, 110, 180, 30, 140, 78, 200};
+const float b_values[MAX_COLORS] = {0, 0, 255, 230, 60, 0, 25, 128, 128, 48, 240, 75, 200, 190, 40, 75, 180, 0, 92, 120};
 
 Coordinates cross_product(Coordinates a, Coordinates b);
-Coordinates calculate_normal(Coordinates x, Coordinates y);
+Coordinates calculate_normal(Coordinates a, Coordinates b, Coordinates c);
 void draw_prism(float size, float height);
 void draw_cylinder(float height, float base, bool half);
 
@@ -51,13 +51,12 @@ public:
         : _xyz(xyz), _size(size)
     {
         _id = next_available_id;
+        next_available_id++;
 
         /*  Boja koja se dobija jedinstveno iz niza boja na osnovu vrednosti promenljive id */
         _c.color_r = r_values[_id%NUM_OF_OBJECTS];
         _c.color_g = g_values[_id%NUM_OF_OBJECTS];
         _c.color_b = b_values[_id%NUM_OF_OBJECTS];
-
-        next_available_id++;
 
         /* Inicijalizuje se sistem objekta na jedinicnu matricu */
         glMatrixMode(GL_MODELVIEW);
@@ -65,17 +64,19 @@ public:
         glGetFloatv(GL_MODELVIEW_MATRIX, _system);
     }
 
-    Color _c;
-    float _system[16];
-    virtual void draw() = 0;
-    virtual void draw_on_main_cube(Color c) const = 0;
+    Color _c; // Boja kojom se boji element
+    Coordinates _xyz; // Pozicija objekta na zamišljenom krugu
+    float _system[16]; // Matrica koja čuva sistem objekta
+    virtual void draw(Color c) = 0; // Metod koji iscrtava objekat
+    virtual void draw_on_main_cube(Color c) const = 0; // Metod koji iscrtava odgovarajući oblik na kocki
     virtual ~Shape() = default;
 
+    int getId() const;
+
 protected:
-    Coordinates _xyz;
-    int _id;
-    float _size;
-    static unsigned int next_available_id;
+    int _id; // identifikator objekta
+    float _size; // Veličina objekta
+    static unsigned int next_available_id; // Brojač napravljenih objekata
 };
 
 class Sphere : public Shape {
@@ -84,7 +85,7 @@ public:
     : Shape(xyz, size)
     {}
 
-    void draw() override;
+    void draw(Color c) override;
     void draw_on_main_cube(Color c) const override;
 };
 
@@ -94,7 +95,7 @@ public:
     : Shape(xyz, size)
     {}
 
-    void draw() override;
+    void draw(Color c) override;
     void draw_on_main_cube(Color c) const override;
 };
 
@@ -106,8 +107,8 @@ public:
         _height = size;
     }
 
-    void draw() override;
-    void draw_on_main_cube(Color c) const;
+    void draw(Color c) override;
+    void draw_on_main_cube(Color c) const override;
 private:
     float _height;
 };
@@ -120,8 +121,8 @@ public:
         _height = base * 2;
     }
 
-    void draw() override;
-    void draw_on_main_cube(Color c) const;
+    void draw(Color c) override;
+    void draw_on_main_cube(Color c) const override;
 private:
     float _height;
 };
@@ -132,8 +133,8 @@ public:
     : Shape(xyz, size)
     {}
 
-    void draw() override;
-    void draw_on_main_cube(Color c) const;
+    void draw(Color c) override;
+    void draw_on_main_cube(Color c) const override;
 };
 
 class Flower : public Shape {
@@ -142,8 +143,8 @@ public:
     : Shape(xyz, size)
     {}
 
-    void draw() override;
-    void draw_on_main_cube(Color c) const;
+    void draw(Color c) override;
+    void draw_on_main_cube(Color c) const override;
 };
 
 class Heart : public Shape {
@@ -154,8 +155,8 @@ public:
         _height = size / 2;
     }
 
-    void draw() override;
-    void draw_on_main_cube(Color c) const;
+    void draw(Color c) override;
+    void draw_on_main_cube(Color c) const override;
 private:
     float _height;
 };

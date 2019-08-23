@@ -1,9 +1,9 @@
 #include "shapes.hpp"
 
 /* Cvet se crta iz 6 valjaka koji predstavljaju latice */
-void Flower::draw()
+void Flower::draw(Color c)
 {
-    glColor3f(_c.color_r, _c.color_g, _c.color_b);
+    glColor3f(c.color_r/255.0, c.color_g/255.0, c.color_b/255.0);
 
     glPushMatrix();
         glTranslatef(_xyz.x, _xyz.y, _xyz.z);
@@ -34,13 +34,9 @@ void Flower::draw()
 /* Iscrtava se odgovarajući cvet na glavnoj kocki */
 void Flower::draw_on_main_cube(Color c) const
 {
-    glColor3f(c.color_r, c.color_g, c.color_b);
+    glColor3f(c.color_r/255.0, c.color_g/255.0, c.color_b/255.0);
 
     glPushMatrix();
-        /* Na osnovu id-ja u mapi se pronalazi odgovarajuća pozicija na kocki */
-        Coordinates xyz = places_on_main_cube.find(_id)->second;
-        glTranslatef(xyz.x, xyz.y, xyz.z);
-
         /* Postoje tri grupe strana na osnovu toga koje ose se koriste za
              * 2d iscrtavanje oblika na glavnoj kocki */
         switch(_id%3)
