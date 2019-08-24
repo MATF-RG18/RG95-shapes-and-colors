@@ -59,7 +59,7 @@ int main(int argc, char **argv) {
     glutInitWindowSize(800, 600);
     glutInitWindowPosition(0, 100);
     glutCreateWindow("Shapes and colors");
-//    glutFullScreen();
+    glutFullScreen();
 
     initialize();
 
