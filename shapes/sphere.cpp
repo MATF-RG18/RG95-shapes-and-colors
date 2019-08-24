@@ -8,7 +8,6 @@ void Sphere::draw(Color c)
     glPushMatrix();
         glTranslatef(_xyz.x, _xyz.y, _xyz.z);
         glutSolidSphere(_size, 30, 30);
-        glGetFloatv(GL_MODELVIEW_MATRIX, _system); // Pamti se sistem objekta
     glPopMatrix();
 }
 

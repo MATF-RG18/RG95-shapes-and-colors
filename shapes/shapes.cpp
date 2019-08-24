@@ -3,7 +3,6 @@
 #include "shapes.hpp"
 
 unsigned int Shape::next_available_id = 0;
-float cylinder_height = 0;
 
 int Shape::getId() const {
     return _id;
@@ -87,37 +86,26 @@ void draw_prism(float size, float height)
     glEnd();
 }
 
-/* half parametar oznacava da li se iscrtava ceo ili polovina cilindra*/
-void draw_cylinder(float height, float base, bool half)
+/* Iscrtava se cilindar iz tri dela, omotača i dve baze */
+void draw_cylinder(float height, float base)
 {
     double i,j;
-    int h = 2;
-
-    if(half)
-       h = 1;
 
     glPushMatrix();
         glTranslatef(0, -(height/2), 0);
 
+        GLUquadricObj *quadratic;
+        quadratic = gluNewQuadric();
+
         /* Iscrtava se omot cilindra */
-        for(i = 0; i < height; i += height / 20)
-        {
-            glBegin(GL_TRIANGLE_STRIP);
-            for(j = 0; j <= M_PI*h + 0.01; j += M_PI / 20)
-            {
-                glNormal3f(cos(j)*base, 0, sin(j)*base);
-                glVertex3f(cos(j)*base, i, sin(j)*base);
-
-                glNormal3f(cos(j)*base, 0, sin(j)*base);
-                cylinder_height = i+height/20;
-                glVertex3f(cos(j)*base, cylinder_height, sin(j)*base);
-            }
-
-            glEnd();
-        }
+        glPushMatrix();
+            glRotatef(90, 1, 0, 0);
+            glTranslatef(0, 0, -height);
+            gluCylinder(quadratic, base, base, height, 20, 20);
+        glPopMatrix();
 
         /* Iscrtavaju se baze cilindra */
-        for(i = 0; i <= cylinder_height; i += cylinder_height)
+        for(i = 0; i <= height; i += height)
         {
             glBegin(GL_TRIANGLE_FAN);
                 if(i == 0)
@@ -128,11 +116,6 @@ void draw_cylinder(float height, float base, bool half)
                 glVertex3f(0, i, 0);
                 for(j = 0; j <= NUM_OF_VERTEXES; j++)
                 {
-                    if(sin(j) < 0 && half)
-                    {
-                        glVertex3f(cos(j)*base, i , -sin(j)*base);
-                    }
-
                     glVertex3f(cos(j)*base, i, sin(j)*base);
                 }
             glEnd();

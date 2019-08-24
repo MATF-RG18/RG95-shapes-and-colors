@@ -37,10 +37,9 @@ const float b_values[MAX_COLORS] = {0, 0, 255, 230, 60, 0, 25, 128, 128, 48, 240
 Coordinates cross_product(Coordinates a, Coordinates b); // Pomoćna funkcija za računanje vektorskog proizvoda
 Coordinates calculate_normal(Coordinates a, Coordinates b, Coordinates c); // Pomoćna funkcija za računanje normale
 void draw_prism(float size, float height); // Pomoćna funkcija za crtanje trostrane prizme
-void draw_cylinder(float height, float base, bool half); // Pomoćna funkcija za crtanje valjka
+void draw_cylinder(float height, float base); // Pomoćna funkcija za crtanje valjka
 
 extern std::map<int, Coordinates> places_on_main_cube; // Mapira se id u poziciju oblika na glavnoj kocki
-extern float cylinder_height;
 
 class Shape {
 public:
@@ -54,11 +53,6 @@ public:
         _c.color_r = r_values[_id%NUM_OF_OBJECTS];
         _c.color_g = g_values[_id%NUM_OF_OBJECTS];
         _c.color_b = b_values[_id%NUM_OF_OBJECTS];
-
-        /* Inicijalizuje se sistem objekta na jedinicnu matricu */
-        glMatrixMode(GL_MODELVIEW);
-        glLoadIdentity();
-        glGetFloatv(GL_MODELVIEW_MATRIX, _system);
     }
 
     Coordinates _xyz; // Pozicija objekta na zamišljenom krugu
@@ -70,7 +64,6 @@ public:
 protected:
     int _id; // identifikator objekta
     float _size; // Veličina objekta
-    float _system[16]; // Matrica koja čuva sistem objekta
     Color _c; // Boja kojom se boji element
     static unsigned int next_available_id; // Brojač napravljenih objekata
 };

@@ -79,8 +79,6 @@ void Star::draw(Color c)
             glRotatef(90, 1, 0, 0);
             draw_prism(_size, _size);
         glPopMatrix();
-
-        glGetFloatv(GL_MODELVIEW_MATRIX, _system); // Pamti se sistem objekta
     glPopMatrix();
 }
 

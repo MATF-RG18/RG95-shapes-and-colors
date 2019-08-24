@@ -11,21 +11,19 @@ void Heart::draw(Color c)
         glPushMatrix();
             glTranslatef(_size/4, 0, -_size*sqrt(3)/4);
             glRotatef(180, 0, 1, 0);
-            draw_cylinder(_height, _size/4, true);
+            draw_cylinder(_height, _size/4);
         glPopMatrix();
 
         glPushMatrix();
             glTranslatef(-_size/4, 0, -_size*sqrt(3)/4);
             glRotatef(180, 0, 1, 0);
-            draw_cylinder(_height, _size/4, true);
+            draw_cylinder(_height, _size/4);
         glPopMatrix();
 
         glPushMatrix();
             glRotatef(90, 1, 0, 0);
             draw_prism(_size, _height);
         glPopMatrix();
-
-        glGetFloatv(GL_MODELVIEW_MATRIX, _system); // Pamti se sistem objekta
     glPopMatrix();
 }
 
@@ -54,12 +52,6 @@ void Heart::draw_on_main_cube(Color c) const
                         glVertex3f(_size/4, 0, 0);
                         for(int i = 0; i <= NUM_OF_VERTEXES; i++)
                         {
-                            if(sin(i) < 0)
-                            {
-                                glVertex3f(cos(i)*_size/4, -sin(i)*_size/4, 0);
-                                continue;
-                            }
-
                             glVertex3f(cos(i)*_size/4, sin(i)*_size/4, 0);
                         }
                         glVertex3f(-_size/4, 0, 0);
@@ -73,12 +65,6 @@ void Heart::draw_on_main_cube(Color c) const
                         glVertex3f(_size/4, 0, 0);
                         for(int i = 0; i <= NUM_OF_VERTEXES; i++)
                         {
-                            if(sin(i) < 0)
-                            {
-                                glVertex3f(cos(i)*_size/4, -sin(i)*_size/4, 0);
-                                continue;
-                            }
-
                             glVertex3f(cos(i)*_size/4, sin(i)*_size/4, 0);
                         }
                         glVertex3f(-_size/4, 0, 0);
@@ -100,12 +86,6 @@ void Heart::draw_on_main_cube(Color c) const
                         glVertex3f(0, 0, -_size/4);
                         for(int i = 0; i <= NUM_OF_VERTEXES; i++)
                         {
-                            if(sin(i) < 0)
-                            {
-                                glVertex3f(0, -sin(i)*_size/4, cos(i)*_size/4);
-                                continue;
-                            }
-
                             glVertex3f(0, sin(i)*_size/4, cos(i)*_size/4);
                         }
                         glVertex3f(0, 0, _size/4);
@@ -119,12 +99,6 @@ void Heart::draw_on_main_cube(Color c) const
                         glVertex3f(0, 0, -_size/4);
                         for(int i = 0; i <= NUM_OF_VERTEXES; i++)
                         {
-                            if(sin(i) < 0)
-                            {
-                                glVertex3f(0, -sin(i)*_size/4, cos(i)*_size/4);
-                                continue;
-                            }
-
                             glVertex3f(0, sin(i)*_size/4, cos(i)*_size/4);
                         }
                         glVertex3f(0, 0, _size/4);
@@ -146,12 +120,6 @@ void Heart::draw_on_main_cube(Color c) const
                         glVertex3f(_size/4, 0, 0);
                         for(int i = 0; i <= NUM_OF_VERTEXES; i++)
                         {
-                            if(sin(i) < 0)
-                            {
-                                glVertex3f(cos(i)*_size/4, 0, sin(i)*_size/4);
-                                continue;
-                            }
-
                             glVertex3f(cos(i)*_size/4, 0, -sin(i)*_size/4);
                         }
                         glVertex3f(-_size/4, 0, 0);
@@ -165,12 +133,6 @@ void Heart::draw_on_main_cube(Color c) const
                         glVertex3f(_size/4, 0, 0);
                         for(int i = 0; i <= NUM_OF_VERTEXES; i++)
                         {
-                            if(sin(i) < 0)
-                            {
-                                glVertex3f(cos(i)*_size/4, 0, sin(i)*_size/4);
-                                continue;
-                            }
-
                             glVertex3f(cos(i)*_size/4, 0, -sin(i)*_size/4);
                         }
                         glVertex3f(-_size/4, 0, 0);

@@ -10,6 +10,7 @@
 #include "texture.hpp"
 
 #define FILENAME0 "images/tekstura_kutije.bmp"
+#define FILENAME1 "images/pozadina.bmp"
 #define TIMER0 0
 #define TIMER1 1
 #define TIMER_INTERVAL0 50
@@ -101,7 +102,19 @@ void initialize() {
     glBindTexture(GL_TEXTURE_2D, names[0]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
+                 image.getWidth(), image.getHeight(), 0,
+                 GL_RGB, GL_UNSIGNED_BYTE, image.getPixels());
+
+    /* Kreira se druga tekstura */
+    image.read(FILENAME1);
+
+    glBindTexture(GL_TEXTURE_2D, names[1]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
                  image.getWidth(), image.getHeight(), 0,
@@ -260,6 +273,36 @@ void on_timer1(int value)
         glutTimerFunc(TIMER_INTERVAL1, on_timer1, TIMER1);
 }
 
+void background()
+{
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+        glLoadIdentity();
+        gluOrtho2D(-window_w/2, window_w/2, -window_h/2, window_h/2);
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+        glLoadIdentity();
+        glDisable(GL_DEPTH_TEST);
+
+        glBindTexture(GL_TEXTURE_2D, names[1]);
+
+//        glTranslatef(-window_w/2, 0, 0);
+        glBegin(GL_QUADS);
+            glTexCoord2d(0.1, 0); glVertex3f(-window_w/2, -window_h/2, 0);
+            glTexCoord2d(1, 0); glVertex3f(window_w/2, -window_h/2, 0);
+            glTexCoord2d(1, 1); glVertex3f(window_w/2, window_h/2, 0);
+            glTexCoord2d(0.1, 1); glVertex3f(-window_w/2, window_h/2, 0);
+        glEnd();
+
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        glEnable(GL_DEPTH_TEST);
+        glPopMatrix();
+        glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+}
+
 void on_display() {
     /* Podešava se svetlo */
 
@@ -273,6 +316,8 @@ void on_display() {
     GLfloat shininess = 50;
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    background();
 
     /* Podešava se tačka pogleda */
     glMatrixMode(GL_MODELVIEW);

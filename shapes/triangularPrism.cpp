@@ -4,11 +4,9 @@
 void TriangularPrism::draw(Color c)
 {
     glColor3f(c.color_r/255.0, c.color_g/255.0, c.color_b/255.0);
-
     glPushMatrix();
         glTranslatef(_xyz.x, _xyz.y, _xyz.z);
         draw_prism(_size, _height);
-        glGetFloatv(GL_MODELVIEW_MATRIX, _system); // Pamti se sistem objekta
     glPopMatrix();
 }
 

@@ -11,7 +11,7 @@ void Flower::draw(Color c)
 
         // Iscrtava se centralni valjak
         glPushMatrix();
-            draw_cylinder(_size, _size*4/3, false);
+            draw_cylinder(_size, _size*4/3);
         glPopMatrix();
 
         /* Parametrizuje se zamišljeni krug na kom se nalaze centri 5 valjaka koji predstavljaju latice,
@@ -24,11 +24,9 @@ void Flower::draw(Color c)
 
             glPushMatrix();
                 glTranslatef(x, 0, z);
-                draw_cylinder(_size, _size, false);
+                draw_cylinder(_size, _size);
             glPopMatrix();
         }
-
-        glGetFloatv(GL_MODELVIEW_MATRIX, _system); // Pamti se sistem objekta
     glPopMatrix();
 }
 

@@ -7,8 +7,7 @@ void Cylinder::draw(Color c)
 
     glPushMatrix();
         glTranslatef(_xyz.x, _xyz.y, _xyz.z);
-        draw_cylinder(_height, _size, false);
-        glGetFloatv(GL_MODELVIEW_MATRIX, _system); // Pamti se sistem objekta
+        draw_cylinder(_height, _size);
     glPopMatrix();
 }
 
