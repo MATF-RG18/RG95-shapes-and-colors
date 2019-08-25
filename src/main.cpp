@@ -141,44 +141,48 @@ void on_keyboard(unsigned char key, int x, int y) {
             glGetFloatv(GL_MODELVIEW_MATRIX, rotation_matrix);
             glutPostRedisplay(); // Forsira se ponovno iscrtavanje
             break;
-        case 32: /* Registruje se prisak na space */
-            /* Prvim pritiskom na space odabran je objekat i u tom trenutku gasi se animacija kretanja objekta
-             * 'gore-dole' i aktivira se animacija rotacije oblika na kocki */
-            if(animation_ongoing0)
+        case 32: /* Registruje se prisak na space, samo ukoliko ima još objekata na sceni */
+            if(!empty)
             {
-                animation_ongoing0 = false;
-                delta_y = 0;
-                /* Da objekat ne bi ostao bilo gde u vazduhu vraća se na poziciju pre animacije */
-                objects[current_object]->_xyz.y = 0;
-
-                glutPostRedisplay(); // Forsira se ponovno iscrtavanje
-
-                /* Uključuje se animacija na glavnoj kocki */
-                animation_ongoing1 = true;
-                glutTimerFunc(TIMER_INTERVAL0, on_timer1, TIMER1);
-            }
-            else
-            {
-                /* Drugim pritiskom na space odabran je oblik na kocki i u tom trenutku se proverava da li su
-                 * upareni prethodno odabrani objekat i oblik, gasi se animacija rotacije i ponovo se pokreće
-                 * anmacija kretanja objekata 'gore-dole' */
-                if(current_shape_on_cube == current_object)
+                /* Prvim pritiskom na space odabran je objekat i u tom trenutku gasi se animacija kretanja objekta
+                * 'gore-dole' i aktivira se animacija rotacije oblika na kocki */
+                if(animation_ongoing0)
                 {
-                    matched = true;
+                    animation_ongoing0 = false;
+                    delta_y = 0;
+                    /* Da objekat ne bi ostao bilo gde u vazduhu vraća se na poziciju pre animacije */
+                    if(objects[current_object] != nullptr) // Provera da nije slučajno već obrisan
+                        objects[current_object]->_xyz.y = 0;
 
                     glutPostRedisplay(); // Forsira se ponovno iscrtavanje
+
+                    /* Uključuje se animacija na glavnoj kocki */
+                    animation_ongoing1 = true;
+                    glutTimerFunc(TIMER_INTERVAL0, on_timer1, TIMER1);
                 }
+                else
+                {
+                    /* Drugim pritiskom na space odabran je oblik na kocki i u tom trenutku se proverava da li su
+                     * upareni prethodno odabrani objekat i oblik, gasi se animacija rotacije i ponovo se pokreće
+                     * anmacija kretanja objekata 'gore-dole' */
+                    if(current_shape_on_cube == current_object)
+                    {
+                        matched = true;
 
-                /* Postavlja se indeks oblika na kocki na naizgled slučajno mesto */
-                current_shape_on_cube = (current_shape_on_cube*2 + 9) % 20;
+                        glutPostRedisplay(); // Forsira se ponovno iscrtavanje
+                    }
 
-                /* Gasi se animacija rotacije */
-                animation_ongoing1 = false;
-                rotation = 0;
+                    /* Postavlja se indeks oblika na kocki na naizgled slučajno mesto */
+                    current_shape_on_cube = (current_shape_on_cube*2 + 9) % 20;
 
-                /* Pokreće se animacija objekata 'gore-dole'*/
-                animation_ongoing0 = true;
-                glutTimerFunc(TIMER_INTERVAL1, on_timer0, TIMER0);
+                    /* Gasi se animacija rotacije */
+                    animation_ongoing1 = false;
+                    rotation = 0;
+
+                    /* Pokreće se animacija objekata 'gore-dole'*/
+                    animation_ongoing0 = true;
+                    glutTimerFunc(TIMER_INTERVAL1, on_timer0, TIMER0);
+                }
             }
             break;
     }
@@ -189,79 +193,87 @@ void on_special(int key, int x, int y)
 {
     switch(key)
     {
-        case GLUT_KEY_RIGHT: /* Pritiskom na desnu strelicu povećavaju se indeksi */
-            /* Ako je aktivna prva animacija, povećavaju se indeksi objekata na zamišljenim krugovima */
-            if(animation_ongoing0)
+        case GLUT_KEY_RIGHT: /* Pritiskom na desnu strelicu povećavaju se indeksi, samo ako ima još oblika */
+            if(!empty)
             {
-                /* Prethodni objekat se vraća na početnu poziciju da ne bi ostao na slučajnom mestu */
-                objects[current_object]->_xyz.y = 0;
-
-                current_object++;
-                if(current_object >= NUM_OF_OBJECTS)
-                    current_object = 0;
-
-                /* Ako je objekat već spojen on ne postoji na sceni, pa ga treba preskočiti */
-                while(matched_objects[current_object])
+                /* Ako je aktivna prva animacija, povećavaju se indeksi objekata na zamišljenim krugovima */
+                if(animation_ongoing0)
                 {
+                    /* Prethodni objekat se vraća na početnu poziciju da ne bi ostao na slučajnom mestu */
+                    if(objects[current_object] != nullptr) // Provera da nije slučajno već obrisan
+                        objects[current_object]->_xyz.y = 0;
+
                     current_object++;
                     if(current_object >= NUM_OF_OBJECTS)
                         current_object = 0;
+
+                    /* Ako je objekat već spojen on ne postoji na sceni, pa ga treba preskočiti */
+                    while(matched_objects[current_object])
+                    {
+                        current_object++;
+                        if(current_object >= NUM_OF_OBJECTS)
+                            current_object = 0;
+                    }
                 }
-            }
-            /* Ako je aktivna druga animacija, povećavaju se indeksi oblika na kocki */
-            else if(animation_ongoing1)
-            {
-                /* Prethodni oblik se vraća u prvobitno stanje, kako ne bi ostao u slučajnom položaju */
-                rotation = 0;
-
-                current_shape_on_cube++;
-                if(current_shape_on_cube >= NUM_OF_OBJECTS)
-                    current_shape_on_cube = 0;
-
-                /* Ako je oblik već spojen on ne postoji na glavnoj kocki, pa ga treba preskočiti */
-                while(matched_objects[current_shape_on_cube])
+                    /* Ako je aktivna druga animacija, povećavaju se indeksi oblika na kocki */
+                else if(animation_ongoing1)
                 {
+                    /* Prethodni oblik se vraća u prvobitno stanje, kako ne bi ostao u slučajnom položaju */
+                    rotation = 0;
+
                     current_shape_on_cube++;
                     if(current_shape_on_cube >= NUM_OF_OBJECTS)
                         current_shape_on_cube = 0;
+
+                    /* Ako je oblik već spojen on ne postoji na glavnoj kocki, pa ga treba preskočiti */
+                    while(matched_objects[current_shape_on_cube])
+                    {
+                        current_shape_on_cube++;
+                        if(current_shape_on_cube >= NUM_OF_OBJECTS)
+                            current_shape_on_cube = 0;
+                    }
                 }
             }
             break;
-        case GLUT_KEY_LEFT: /* Pritiskom na desnu strelicu smanjuju se indeksi */
-            /* Ako je aktivna prva animacija, smanjuju se indeksi objekata na zamišljenim krugovima */
-            if(animation_ongoing0)
+        case GLUT_KEY_LEFT: /* Pritiskom na desnu strelicu smanjuju se indeksi, samo ako ima još oblika  */
+            if(!empty)
             {
-                /* Prethodni objekat se vraća na početnu poziciju da ne bi ostao na slučajnom mestu */
-                objects[current_object]->_xyz.y = 0;
-
-                current_object--;
-                if(current_object <= 0)
-                    current_object = NUM_OF_OBJECTS-1;
-
-                /* Ako je objekat već spojen on ne postoji na sceni, pa ga treba preskočiti */
-                while(matched_objects[current_object])
+                /* Ako je aktivna prva animacija, smanjuju se indeksi objekata na zamišljenim krugovima */
+                if(animation_ongoing0)
                 {
+                    /* Prethodni objekat se vraća na početnu poziciju da ne bi ostao na slučajnom mestu */
+                    if(objects[current_object] != nullptr) // Provera da nije slučajno već obrisan
+                        objects[current_object]->_xyz.y = 0;
+
                     current_object--;
                     if(current_object <= 0)
                         current_object = NUM_OF_OBJECTS-1;
+
+                    /* Ako je objekat već spojen on ne postoji na sceni, pa ga treba preskočiti */
+                    while(matched_objects[current_object])
+                    {
+                        current_object--;
+                        if(current_object <= 0)
+                            current_object = NUM_OF_OBJECTS-1;
+                    }
                 }
-            }
-            /* Ako je aktivna druga animacija, smanjuju se indeksi oblika na kocki */
-            else if(animation_ongoing1)
-            {
-                /* Prethodni oblik se vraća u prvobitno stanje, kako ne bi ostao u slučajnom položaju */
-                rotation = 0;
-
-                current_shape_on_cube--;
-                if(current_shape_on_cube <= 0)
-                    current_shape_on_cube = NUM_OF_OBJECTS-1;
-
-                /* Ako je oblik već spojen on ne postoji na glavnoj kocki, pa ga treba preskočiti */
-                while(matched_objects[current_shape_on_cube])
+                    /* Ako je aktivna druga animacija, smanjuju se indeksi oblika na kocki */
+                else if(animation_ongoing1)
                 {
+                    /* Prethodni oblik se vraća u prvobitno stanje, kako ne bi ostao u slučajnom položaju */
+                    rotation = 0;
+
                     current_shape_on_cube--;
                     if(current_shape_on_cube <= 0)
                         current_shape_on_cube = NUM_OF_OBJECTS-1;
+
+                    /* Ako je oblik već spojen on ne postoji na glavnoj kocki, pa ga treba preskočiti */
+                    while(matched_objects[current_shape_on_cube])
+                    {
+                        current_shape_on_cube--;
+                        if(current_shape_on_cube <= 0)
+                            current_shape_on_cube = NUM_OF_OBJECTS-1;
+                    }
                 }
             }
             break;
@@ -319,36 +331,36 @@ void background()
 {
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
-        glLoadIdentity();
-        /* Postavlja se ortografska projekcija */
-        gluOrtho2D(-window_w/2, window_w/2, -window_h/2, window_h/2);
-        glMatrixMode(GL_MODELVIEW);
-        glPushMatrix();
-            glLoadIdentity();
-            glDisable(GL_DEPTH_TEST); //Isključuje se provera dubine kako bi svi ostali objekti bili "preko" pozadine
+    glLoadIdentity();
+    /* Postavlja se ortografska projekcija */
+    gluOrtho2D(-window_w/2, window_w/2, -window_h/2, window_h/2);
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+    glDisable(GL_DEPTH_TEST); //Isključuje se provera dubine kako bi svi ostali objekti bili "preko" pozadine
 
-            glBindTexture(GL_TEXTURE_2D, names[1]);
+    glBindTexture(GL_TEXTURE_2D, names[1]);
 
-            /* Postavljaju se tačke pravougaonika koji će sadržati pozadinu*/
-            glBegin(GL_QUADS);
-                glTexCoord2d(0.1, 0);
-                glVertex3f(-window_w/2, -window_h/2, 0);
+    /* Postavljaju se tačke pravougaonika koji će sadržati pozadinu*/
+    glBegin(GL_QUADS);
+    glTexCoord2d(0.1, 0);
+    glVertex3f(-window_w/2, -window_h/2, 0);
 
-                glTexCoord2d(1, 0);
-                glVertex3f(window_w/2, -window_h/2, 0);
+    glTexCoord2d(1, 0);
+    glVertex3f(window_w/2, -window_h/2, 0);
 
-                glTexCoord2d(1, 1);
-                glVertex3f(window_w/2, window_h/2, 0);
+    glTexCoord2d(1, 1);
+    glVertex3f(window_w/2, window_h/2, 0);
 
-                glTexCoord2d(0.1, 1);
-                glVertex3f(-window_w/2, window_h/2, 0);
-            glEnd();
+    glTexCoord2d(0.1, 1);
+    glVertex3f(-window_w/2, window_h/2, 0);
+    glEnd();
 
-            glBindTexture(GL_TEXTURE_2D, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
-            glEnable(GL_DEPTH_TEST); // Ponovo se omogućava provera dubine
-        glPopMatrix();
-        glMatrixMode(GL_PROJECTION);
+    glEnable(GL_DEPTH_TEST); // Ponovo se omogućava provera dubine
+    glPopMatrix();
+    glMatrixMode(GL_PROJECTION);
     glPopMatrix();
     glMatrixMode(GL_MODELVIEW);
 }
@@ -394,40 +406,20 @@ void on_display() {
 
     glMaterialf(GL_FRONT, GL_SHININESS, shininess);
 
-    /* Proverava se da li ima još neuparenih */
-    if(!empty)
-    {
-        int br = 0;
-        for(int i=0; i<NUM_OF_OBJECTS; i++)
-        {
-            if(!matched_objects[i])
-                br++;
-        }
-
-        if(br == 0)
-        {
-            empty = true;
-            animation_ongoing1 = true;
-            rotation = 0;
-            glutTimerFunc(TIMER_INTERVAL1, on_timer1, TIMER1);
-            return;
-        }
-    }
-
     /* Iscrtava se osnovna kocka */
     glBindTexture(GL_TEXTURE_2D, names[0]);
-        MainCube m;
-        if(empty)
-        {
-            glPushMatrix();
-                glRotatef(rotation, 0, 1, 0);
-                m.draw();
-            glPopMatrix();
-        }
-        else
-        {
-            m.draw();
-        }
+    MainCube m;
+    if(empty)
+    {
+        glPushMatrix();
+        glRotatef(rotation, 0, 1, 0);
+        m.draw();
+        glPopMatrix();
+    }
+    else
+    {
+        m.draw();
+    }
     glBindTexture(GL_TEXTURE_2D, 0);
 
     if (first_draw)
@@ -450,13 +442,45 @@ void on_display() {
             continue;
 
         /* Ako je nešto upareno to se beleži */
-        if(i == current_object && matched)
-        {
+        if(i == current_object && matched) {
             objects[i] = nullptr;
 
             matched_objects[i] = true;
-            current_object++;
             matched = false;
+
+            /* Proverava se da li ima još neuparenih */
+            if (!empty) {
+                int br = 0;
+                for (int i = 0; i < NUM_OF_OBJECTS; i++) {
+                    if (!matched_objects[i])
+                        br++;
+                }
+
+                if (br == 0) {
+                    empty = true;
+                    animation_ongoing1 = true;
+                    rotation = 0;
+                    glutTimerFunc(TIMER_INTERVAL1, on_timer1, TIMER1);
+                    return;
+                }
+            }
+
+            /* Samo ako nije prazan menja se indeks tekućeg oblika */
+            if (!empty)
+            {
+                current_object++;
+                if(current_object >= NUM_OF_OBJECTS)
+                    current_object = 0;
+
+                /* Ako je objekat već spojen on ne postoji na sceni, pa ga treba preskočiti */
+                while(matched_objects[current_object])
+                {
+                    current_object++;
+                    if(current_object >= NUM_OF_OBJECTS)
+                        current_object = 0;
+                }
+            }
+
             continue;
         }
 
@@ -479,7 +503,7 @@ void on_display() {
                 objects[i]->draw_on_main_cube(objects[i]->getC());
                 glPopMatrix();
             }
-            /* Ako je pronadjen trenutni oblik na kocki vrši se rotacija */
+                /* Ako je pronadjen trenutni oblik na kocki vrši se rotacija */
             else if(i == current_shape_on_cube && animation_ongoing1)
             {
                 objects[i]->draw(objects[i]->getC());
@@ -506,7 +530,7 @@ void on_display() {
                 objects[i]->draw_on_main_cube(objects[i]->getC());
                 glPopMatrix();
             }
-            /* Inače se samo iscrtava objekat i oblik na kocki */
+                /* Inače se samo iscrtava objekat i oblik na kocki */
             else
             {
                 objects[i]->draw(objects[i]->getC());
@@ -562,9 +586,12 @@ void on_motion(int x, int y) {
     mouse_x = x;
     mouse_y = y;
 
-    /* Izračunava se nova matrica rotacije */
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
+    /* Ukoliko su svi oblici spojeni, kocka počinje sama da se rotira pa više nije dozvoljena rotacija mišem */
+    if(!empty)
+    {
+        /* Izračunava se nova matrica rotacije */
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
         glLoadIdentity();
 
         if (new_x < 0)
@@ -586,7 +613,8 @@ void on_motion(int x, int y) {
 
         glMultMatrixf(rotation_matrix);
         glGetFloatv(GL_MODELVIEW_MATRIX, rotation_matrix); // Čuva se u matrici rotacije trenutni sistem
-    glPopMatrix();
+        glPopMatrix();
 
-    glutPostRedisplay(); // Forsira se ponovno iscrtavanje
+        glutPostRedisplay(); // Forsira se ponovno iscrtavanje
+    }
 }
