@@ -150,6 +150,7 @@ void on_keyboard(unsigned char key, int x, int y) {
                 {
                     animation_ongoing0 = false;
                     delta_y = 0;
+
                     /* Da objekat ne bi ostao bilo gde u vazduhu vraća se na poziciju pre animacije */
                     if(objects[current_object] != nullptr) // Provera da nije slučajno već obrisan
                         objects[current_object]->_xyz.y = 0;
@@ -331,36 +332,36 @@ void background()
 {
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
-    glLoadIdentity();
-    /* Postavlja se ortografska projekcija */
-    gluOrtho2D(-window_w/2, window_w/2, -window_h/2, window_h/2);
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadIdentity();
-    glDisable(GL_DEPTH_TEST); //Isključuje se provera dubine kako bi svi ostali objekti bili "preko" pozadine
+        glLoadIdentity();
+        /* Postavlja se ortografska projekcija */
+        gluOrtho2D(-window_w/2, window_w/2, -window_h/2, window_h/2);
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+            glLoadIdentity();
+            glDisable(GL_DEPTH_TEST); //Isključuje se provera dubine kako bi svi ostali objekti bili "preko" pozadine
 
-    glBindTexture(GL_TEXTURE_2D, names[1]);
+            glBindTexture(GL_TEXTURE_2D, names[1]);
 
-    /* Postavljaju se tačke pravougaonika koji će sadržati pozadinu*/
-    glBegin(GL_QUADS);
-    glTexCoord2d(0.1, 0);
-    glVertex3f(-window_w/2, -window_h/2, 0);
+            /* Postavljaju se tačke pravougaonika koji će sadržati pozadinu*/
+                glBegin(GL_QUADS);
+                    glTexCoord2d(0.1, 0);
+                    glVertex3f(-window_w/2, -window_h/2, 0);
 
-    glTexCoord2d(1, 0);
-    glVertex3f(window_w/2, -window_h/2, 0);
+                    glTexCoord2d(1, 0);
+                    glVertex3f(window_w/2, -window_h/2, 0);
 
-    glTexCoord2d(1, 1);
-    glVertex3f(window_w/2, window_h/2, 0);
+                    glTexCoord2d(1, 1);
+                    glVertex3f(window_w/2, window_h/2, 0);
 
-    glTexCoord2d(0.1, 1);
-    glVertex3f(-window_w/2, window_h/2, 0);
-    glEnd();
+                    glTexCoord2d(0.1, 1);
+                    glVertex3f(-window_w/2, window_h/2, 0);
+                glEnd();
 
-    glBindTexture(GL_TEXTURE_2D, 0);
+            glBindTexture(GL_TEXTURE_2D, 0);
 
-    glEnable(GL_DEPTH_TEST); // Ponovo se omogućava provera dubine
-    glPopMatrix();
-    glMatrixMode(GL_PROJECTION);
+            glEnable(GL_DEPTH_TEST); // Ponovo se omogućava provera dubine
+        glPopMatrix();
+        glMatrixMode(GL_PROJECTION);
     glPopMatrix();
     glMatrixMode(GL_MODELVIEW);
 }
@@ -409,17 +410,17 @@ void on_display() {
     /* Iscrtava se osnovna kocka */
     glBindTexture(GL_TEXTURE_2D, names[0]);
     MainCube m;
-    if(empty)
-    {
-        glPushMatrix();
-        glRotatef(rotation, 0, 1, 0);
-        m.draw();
-        glPopMatrix();
-    }
-    else
-    {
-        m.draw();
-    }
+        if(empty)
+        {
+            glPushMatrix();
+            glRotatef(rotation, 0, 1, 0);
+            m.draw();
+            glPopMatrix();
+        }
+        else
+        {
+            m.draw();
+        }
     glBindTexture(GL_TEXTURE_2D, 0);
 
     if (first_draw)
@@ -442,21 +443,25 @@ void on_display() {
             continue;
 
         /* Ako je nešto upareno to se beleži */
-        if(i == current_object && matched) {
+        if(i == current_object && matched)
+        {
             objects[i] = nullptr;
 
             matched_objects[i] = true;
             matched = false;
 
             /* Proverava se da li ima još neuparenih */
-            if (!empty) {
+            if (!empty)
+            {
                 int br = 0;
-                for (int i = 0; i < NUM_OF_OBJECTS; i++) {
+                for (int i = 0; i < NUM_OF_OBJECTS; i++)
+                {
                     if (!matched_objects[i])
                         br++;
                 }
 
-                if (br == 0) {
+                if (br == 0)
+                {
                     empty = true;
                     animation_ongoing1 = true;
                     rotation = 0;
@@ -496,11 +501,11 @@ void on_display() {
                 objects[i]->draw(objects[i]->getC());
 
                 glPushMatrix();
-                /* Na osnovu id-ja u mapi se pronalazi odgovarajuća pozicija na kocki */
-                Coordinates xyz = places_on_main_cube.find(objects[i]->getId())->second;
-                glTranslatef(xyz.x, xyz.y, xyz.z);
+                    /* Na osnovu id-ja u mapi se pronalazi odgovarajuća pozicija na kocki */
+                    Coordinates xyz = places_on_main_cube.find(objects[i]->getId())->second;
+                    glTranslatef(xyz.x, xyz.y, xyz.z);
 
-                objects[i]->draw_on_main_cube(objects[i]->getC());
+                    objects[i]->draw_on_main_cube(objects[i]->getC());
                 glPopMatrix();
             }
                 /* Ako je pronadjen trenutni oblik na kocki vrši se rotacija */
@@ -509,38 +514,38 @@ void on_display() {
                 objects[i]->draw(objects[i]->getC());
 
                 glPushMatrix();
-                /* Na osnovu id-ja u mapi se pronalazi odgovarajuća pozicija na kocki */
-                Coordinates xyz = places_on_main_cube.find(objects[i]->getId())->second;
-                glTranslatef(xyz.x, xyz.y, xyz.z);
+                    /* Na osnovu id-ja u mapi se pronalazi odgovarajuća pozicija na kocki */
+                    Coordinates xyz = places_on_main_cube.find(objects[i]->getId())->second;
+                    glTranslatef(xyz.x, xyz.y, xyz.z);
 
-                switch(objects[i]->getId() % 3)
-                {
-                    case 0:
-                        glRotatef(rotation, 0, 0, 1);
-                        break;
-                    case 1:
-                        glRotatef(rotation, 1, 0, 0);
-                        break;
-                    case 2:
-                        glRotatef(rotation, 0, 1, 0);
-                        break;
-                    default: std::cerr << "This should not happen" << std::endl;
-                }
+                    switch(objects[i]->getId() % 3)
+                    {
+                        case 0:
+                            glRotatef(rotation, 0, 0, 1);
+                            break;
+                        case 1:
+                            glRotatef(rotation, 1, 0, 0);
+                            break;
+                        case 2:
+                            glRotatef(rotation, 0, 1, 0);
+                            break;
+                        default: std::cerr << "This should not happen" << std::endl;
+                    }
 
-                objects[i]->draw_on_main_cube(objects[i]->getC());
+                    objects[i]->draw_on_main_cube(objects[i]->getC());
                 glPopMatrix();
             }
-                /* Inače se samo iscrtava objekat i oblik na kocki */
+            /* Inače se samo iscrtava objekat i oblik na kocki */
             else
             {
                 objects[i]->draw(objects[i]->getC());
 
                 glPushMatrix();
-                /* Na osnovu id-ja u mapi se pronalazi odgovarajuća pozicija na kocki */
-                Coordinates xyz = places_on_main_cube.find(objects[i]->getId())->second;
-                glTranslatef(xyz.x, xyz.y, xyz.z);
+                    /* Na osnovu id-ja u mapi se pronalazi odgovarajuća pozicija na kocki */
+                    Coordinates xyz = places_on_main_cube.find(objects[i]->getId())->second;
+                    glTranslatef(xyz.x, xyz.y, xyz.z);
 
-                objects[i]->draw_on_main_cube(objects[i]->getC());
+                    objects[i]->draw_on_main_cube(objects[i]->getC());
                 glPopMatrix();
             }
 
@@ -550,7 +555,8 @@ void on_display() {
     glutSwapBuffers();
 }
 
-void on_reshape(int width, int height) {
+void on_reshape(int width, int height)
+{
     window_h = height;
     window_w = width;
 
