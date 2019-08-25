@@ -7,7 +7,7 @@
 - Nezaboravna, stara dečija igračka uz koju su deca nekada učila oblike i boje. Nekada drvena, danas digitalna.
 Osnovna ideja igrice je pomoć maloj deci u razvijanju logičkog razmišljanja.
 
-- Pri svakom pokretanju igrice, na slučajan način se iscrtavaju oblici i boje različitim bojama.
+- Pri svakom pokretanju igrice, na slučajan način se iscrtavaju oblici, slučajno odabrane veličine i boje se različitim bojama.
 
 - Cilj je ubaciti sve oblike obojene različitim bojama, koji su raspoređeni oko drvene kocke, u odgovarajuća mesta na drvenoj kocki.
 
@@ -29,4 +29,12 @@ Ako su dobro upareni oblici, oni nestaju i prelazi se na biranje sledećeg oblik
 
 - Kada se ubace svi oblici, drvena kocka počne od sreće da se okreće u prostoru. :blush:
 
+## :hammer: Instalacija
 
+- git clone https://github.com/MATF-RG18/RG95-shapes-and-colors.git
+- cd RG95-shapes-and-colors/
+- mkdir bin
+- cd bin
+- cmake ..
+- make
+- ./RG95-shapes-and-colors 
